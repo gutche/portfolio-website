@@ -1,6 +1,208 @@
 ---
 import "../styles/global.css";
 import Layout from "../layouts/Layout.astro";
+import Crt from "../components/crt.astro";
+import { Image } from "astro:assets";
+import crtImage from "../assets/crt.png";
+const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
+let activeTab = "info";
 ---
 
-<Layout />
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+		const buttons = document.querySelectorAll(".tab-button");
+		const contents = document.querySelectorAll(".tab-content");
+
+		buttons.forEach((button, index) => {
+			button.addEventListener("click", () => {
+				buttons.forEach((btn) => btn.classList.remove("active"));
+				contents.forEach((content) =>
+					content.classList.remove("active")
+				);
+
+				button.classList.add("active");
+				contents[index].classList.add("active");
+			});
+		});
+	});
+</script>
+<style>
+	.tab-content {
+		display: none;
+	}
+	.tab-content.active {
+		display: block;
+	}
+	.tab-button.active {
+		font-weight: bold;
+	}
+</style>
+
+<Layout>
+	<div class="md:h-screen flex md:overflow-hidden">
+		<div class="lines flex-1"></div><div class="flex w-full max-w-[1400px]">
+			<div class="flex-1 w-full md:max-w-[500px]">
+				<div class="p-3 pb-24 md:p-4 flex flex-col h-full">
+					<!-- Top part -->
+					<div
+						class="flex justify-between items-center gap-1 mb-4 md:mb-12">
+						<div
+							class="flex flex-col flex-1 h-10 gap-px justify-between">
+							<div>
+								<div class="h-px bg-white w-full opacity-10">
+								</div><div class="h-px bg-neutral-950 w-full">
+								</div>
+							</div><div>
+								<div class="h-px bg-white w-full opacity-10">
+								</div><div class="h-px bg-neutral-950 w-full">
+								</div>
+							</div><div>
+								<div class="h-px bg-white w-full opacity-10">
+								</div><div class="h-px bg-neutral-950 w-full">
+								</div>
+							</div><div>
+								<div class="h-px bg-white w-full opacity-10">
+								</div><div class="h-px bg-neutral-950 w-full">
+								</div>
+							</div><div>
+								<div class="h-px bg-white w-full opacity-10">
+								</div><div class="h-px bg-neutral-950 w-full">
+								</div>
+							</div><div>
+								<div class="h-px bg-white w-full opacity-10">
+								</div><div class="h-px bg-neutral-950 w-full">
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- Top part -->
+
+					<div class="flex flex-col gap-2 flex-1 overflow-hidden">
+						<p class="text-base hidden md:block">INFORMATION</p>
+						<div class="min-h-4 md:min-h-8 w-full lines mb-1"></div>
+						<div
+							class="flex flex-col gap-3 md:flex-row md:gap-8 min-h-0">
+							<!-- Tab Buttons -->
+							<div class="flex md:flex-col gap-2">
+								{
+									tabs.map((tab) => (
+										<button
+											class={`tab-button ${tab === activeTab ? "active" : ""} relative text-left text-uppercase whitespace-nowrap uppercase text-sm data-[state=active]:opacity-100 opacity-50 focus max-md:border max-md:border-transparent max-md:data-[state=active]:border-gray-400 border-dotted max-md:px-1 max-md:pt-1 max-md:pb-0.5 cursor-pointer`}>
+											{tab.toUpperCase()}
+										</button>
+									))
+								}
+							</div>
+							<!-- This is the crt that shows up on smaller devices -->
+							<div class="w-full md:hidden">
+								<div
+									style="position:relative;width:100%;padding-bottom:100%"
+									data-radix-aspect-ratio-wrapper="">
+									<div
+										style="position:absolute;top:0;right:0;bottom:0;left:0">
+										<div class="p-1 md:p-16 h-full">
+											<div
+												class="relative h-full w-full p-6">
+												<div
+													class="h-full w-full bg-neutral-900 rounded-3xl relative overflow-hidden">
+													<div
+														style="position:relative;width:100%;height:100%;overflow:hidden;pointer-events:auto">
+														<div
+															style="width:100%;height:100%">
+															<canvas
+																style="display:block"
+															></canvas>
+														</div>
+													</div>
+												</div>
+												<Image
+													alt="monitor"
+													loading="lazy"
+													decoding="async"
+													data-nimg="fill"
+													class="select-none pointer-events-none"
+													style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent"
+													sizes="100vw"
+													src={crtImage}
+												/>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div
+								tabindex="0"
+								class={`tab-content ${tabs[0] === activeTab ? "active" : ""} w-full focus`}
+								style="">
+								<div class="flex flex-col gap-4">
+									<p class="text-base">
+										Gledrian is a
+										<span
+											class="text-primary border-b border-dotted"
+											>Software Engineer</span
+										> with an unhealthy obession for tech and
+										sports.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div
+						class="fixed bottom-0 left-0 right-0 bg-neutral-900 p-2 md:relative md:p-0 md:border-none md:bg-transparent md:mt-auto md:bottom-auto">
+						<div
+							class="absolute top-0 left-0 right-0 w-full md:hidden">
+							<div class="h-px bg-white w-full opacity-10">
+							</div><div class="h-px bg-black w-full"></div>
+						</div><div class="relative flex gap-0.5 p-0.5 w-full">
+							<div class="flex-1">
+								<div
+									class="absolute inset-0 bg-black z-0 blur-[1px] shadow-[0_1px_1px_rgba(255,255,255,0.3)] rounded-[6px]">
+								</div><button
+									class="z-10 relative p-2 bg-neutral-900 w-full h-14 shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45),_inset_0_1px_2px_rgba(255,255,255,0.3)] rounded-[4px] focus active:shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45)] active:scale-[0.99] transition-all duration-200"
+									><div
+										class="h-full w-full flex items-center justify-center rounded-full bg-neutral-900 blur-[2px] shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),_0_5px_4px_rgba(0,0,0,0.75)]">
+									</div><span
+										class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-base uppercase pt-1 whitespace-nowrap"
+										>Send message</span
+									></button
+								>
+							</div><div class="w-14">
+								<div
+									class="absolute inset-0 bg-black z-0 blur-[1px] shadow-[0_1px_1px_rgba(255,255,255,0.3)] rounded-[6px]">
+								</div><button
+									class="z-10 relative p-2 bg-neutral-900 w-full h-14 shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45),_inset_0_1px_2px_rgba(255,255,255,0.3)] rounded-[4px] focus active:shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45)] active:scale-[0.99] transition-all duration-200"
+									><div
+										class="h-full w-full flex items-center justify-center rounded-full bg-neutral-900 blur-[2px] shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),_0_5px_4px_rgba(0,0,0,0.75)]">
+									</div><span
+										class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-base uppercase pt-1 whitespace-nowrap"
+										><svg
+											fill="none"
+											xmlns="http://www.w3.org/2000/svg"
+											viewBox="0 0 24 24"
+											width="16"
+											height="16"
+											><path
+												d="M11 2h2v20h-2v-2H9v-2h2V6H9V4h2V2zM7 8V6h2v2H7zm0 8H3V8h4v2H5v4h2v2zm0 0v2h2v-2H7zm10-6h-2v4h2v-4zm2-2h2v8h-2V8zm0 8v2h-4v-2h4zm0-10v2h-4V6h4z"
+												fill="currentColor"></path></svg
+										></span
+									><span
+										class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#FFF9FB] rounded-full blur-[0.4px] shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]"
+									></span></button
+								>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="hidden md:flex">
+				<div class="h-screen bg-white w-px opacity-10"></div>
+				<div class="h-screen w-px bg-black"></div>
+			</div>
+
+			<Crt />
+		</div>
+		<div class="lines flex-1"></div>
+	</div>
+</Layout>
