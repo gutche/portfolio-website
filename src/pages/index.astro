@@ -11,7 +11,8 @@ let activeTab = "info";
 
 <Layout>
 	<div class="md:h-screen flex md:overflow-hidden">
-		<div class="lines flex-1"></div><div class="flex w-full max-w-[1400px]">
+		<div class="lines flex-1"></div>
+		<div class="flex w-full max-w-[1400px]">
 			<div class="flex-1 w-full md:max-w-[500px]">
 				<div class="p-3 pb-24 md:p-4 flex flex-col h-full">
 					<!-- Top part -->
@@ -64,25 +65,33 @@ let activeTab = "info";
 									))
 								}
 							</div>
-							<!-- Mobile CRT -->
+							<!-- Mobile CRT - Scaled down -->
 							<div class="w-full md:hidden">
-								<div class="relative w-full aspect-square p-6">
+								<div
+									class="relative w-full aspect-square p-6 max-w-xs mx-auto">
+									<!-- 1. Base image -->
+									<img
+										src={profileImage.src}
+										alt="Profile"
+										class="absolute inset-0 w-full h-full object-contain z-1 py-[8px]"
+									/>
+
+									<!-- 2. CRT Effect with brightness -->
+									<CrtEffect
+										class="z-5"
+										isMobile={true}
+										brightness={1.2}
+									/>
+
+									<!-- 3. Monitor overlay -->
 									<Image
 										alt="monitor"
 										loading="lazy"
 										decoding="async"
-										class="select-none pointer-events-none absolute inset-0 w-full h-full"
+										class="select-none pointer-events-none absolute inset-0 w-full h-full z-10"
 										sizes="100vw"
 										src={crtImage}
 									/>
-									<div
-										class="absolute inset-[8%] rounded-2xl overflow-hidden">
-										<CrtEffect
-											client:load
-											imageUrl={profileImage.src}
-											isMobile={true}
-										/>
-									</div>
 								</div>
 							</div>
 							<div
@@ -156,29 +165,36 @@ let activeTab = "info";
 				<div class="h-screen w-px bg-black"></div>
 			</div>
 
-			<!-- Desktop CRT -->
+			<!-- Desktop CRT - Scaled down and brighter -->
 			<div class="hidden flex-1 md:flex items-center">
-				<div style="position:relative;width:100%;padding-bottom:100%">
+				<div
+					style="position:relative;width:85%;padding-bottom:85%;margin:0 auto">
 					<div
 						style="position:absolute;top:0;right:0;bottom:0;left:0">
-						<div class="p-1 md:p-16 h-full">
+						<div class="p-1 md:p-12 h-full">
 							<div class="relative h-full w-full p-6">
 								<div
-									class="h-full w-full bg-neutral-900 rounded-3xl relative overflow-hidden z-20">
-									<CrtEffect
-										client:load
-										imageUrl={profileImage.src}
+									class="h-full w-full rounded-3xl relative overflow-hidden">
+									<!-- 1. Base image with brightness filter -->
+									<img
+										src={profileImage.src}
+										alt="Profile"
+										class="absolute inset-0 w-full h-full z-1 left-1/2 bottom-0 transform -translate-x-1/2 object-contain py-[8px]"
+									/>
+
+									<!-- 2. CRT Effect with brightness parameter -->
+									<CrtEffect brightness={10.0} />
+
+									<!-- 3. Monitor overlay -->
+									<Image
+										alt="monitor"
+										loading="lazy"
+										decoding="async"
+										class="select-none pointer-events-none absolute inset-0 w-full h-full z-10"
+										sizes="100vw"
+										src={crtImage}
 									/>
 								</div>
-								<Image
-									alt="monitor"
-									loading="lazy"
-									decoding="async"
-									class="select-none pointer-events-none absolute inset-0 w-full h-full"
-									style="z-index:10"
-									sizes="100vw"
-									src={crtImage}
-								/>
 							</div>
 						</div>
 					</div>

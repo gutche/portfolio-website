@@ -1,11 +1,11 @@
 ---
 // Props for the component
-const { imageUrl, isMobile = false } = Astro.props;
+const { isMobile = false, class: className } = Astro.props;
 ---
 
 <div
-	class={isMobile ? "crt-container-mobile" : "crt-container"}
-	data-image-url={imageUrl}>
+	class={`${isMobile ? "crt-container-mobile" : "crt-container"} ${className || ""}`}
+	data-image-url={Astro.props.imageUrl}>
 </div>
 
 <script>
@@ -13,22 +13,36 @@ const { imageUrl, isMobile = false } = Astro.props;
 
 	class CRTEffect {
 		container: HTMLElement;
-		imageUrl: string;
 		width: number;
 		height: number;
 		scene: THREE.Scene = new THREE.Scene();
 		camera: THREE.OrthographicCamera = new THREE.OrthographicCamera();
 		renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer();
 		material: THREE.ShaderMaterial = new THREE.ShaderMaterial();
-		constructor(container: HTMLElement, imageUrl: string) {
-			this.container = container;
-			this.imageUrl = imageUrl;
-			this.width = container.offsetWidth;
-			this.height = container.offsetHeight;
 
+		constructor(container: HTMLElement) {
+			this.container = container;
+			this.width = container.clientWidth;
+			this.height = container.clientHeight;
 			this.setupScene();
-			this.loadTexture();
-			this.animate();
+			
+			// Load the image before animation
+			const imageUrl = container.getAttribute('data-image-url');
+			if (imageUrl) {
+				const loader = new THREE.TextureLoader();
+				loader.load(imageUrl, (texture) => {
+					// Set texture wrapping and repeat to avoid stretching
+					texture.wrapS = THREE.ClampToEdgeWrapping;
+					texture.wrapT = THREE.ClampToEdgeWrapping;
+					this.material.uniforms.tDiffuse = { value: texture };
+					this.animate();
+					// Trigger initial resize to ensure proper fitting
+					this.updateSize();
+				});
+			} else {
+				this.animate();
+			}
+			
 			this.setupResizeListener();
 		}
 
@@ -48,65 +62,63 @@ const { imageUrl, isMobile = false } = Astro.props;
 			this.container.appendChild(this.renderer.domElement);
 
 			const geometry = new THREE.PlaneGeometry(2, 2);
+
+			// Modified shader material to create CRT effects with improved brightness and moving scan lines
 			this.material = new THREE.ShaderMaterial({
 				uniforms: {
-					tDiffuse: { value: null },
+					tDiffuse: { value: null }, // Texture will be set after loading
 					time: { value: 0.0 },
-					sIntensity: { value: 0.1 },
-					sCount: { value: 8000 },
-					nIntensity: { value: 0.4 },
+					sIntensity: { value: 0.08 }, // Reduced for subtler scan lines
+					sCount: { value: 800 }, // More lines for smoother effect
+					nIntensity: { value: 0.15 }, // Adjusted noise
+					brightness: { value: 1.0 }, // Normal brightness
 				},
 				transparent: true,
 				vertexShader: `
-          varying vec2 vUv;
-          void main() {
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `,
+				varying vec2 vUv;
+				void main() {
+					vUv = uv;
+					gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+				}
+				`,
 				fragmentShader: `
-          uniform sampler2D tDiffuse;
-          uniform float time;
-          uniform float sIntensity;
-          uniform float sCount;
-          uniform float nIntensity;
-          varying vec2 vUv;
+				uniform sampler2D tDiffuse;
+				uniform float time;
+				uniform float sIntensity;
+				uniform float sCount;
+				uniform float nIntensity;
+				uniform float brightness;
+				varying vec2 vUv;
 
-          float random(vec2 c) {
-            return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
-          }
+				float random(vec2 c) {
+					return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
+				}
 
-          void main() {
-            vec2 uv = vUv;
-            vec4 color = texture2D(tDiffuse, uv);
-            float scanline = 0.5 + 0.5 * sin(uv.y * sCount - time * 0.5);
-            scanline = 1.0 - (scanline * sIntensity);
-            color.rgb *= scanline;
-            float noise = random(uv + vec2(time * 0.001)) * nIntensity;
-            color.rgb += vec3(noise);
-            gl_FragColor = color;
-          }
-        `,
+				void main() {
+					vec2 uv = vUv;
+					
+					// Get the original texture color
+					vec4 texel = texture2D(tDiffuse, uv);
+					
+					// Create moving scanline effect (top to bottom) - slower speed
+					float scanline = 0.5 + 0.5 * sin(uv.y * sCount - time * 0.8);
+					scanline = 1.0 - (scanline * sIntensity);
+					
+					// Create noise effect
+					float noise = random(uv + vec2(time * 0.001)) * nIntensity;
+					
+					// Apply effects while preserving original colors
+					vec3 result = texel.rgb * scanline * brightness;
+					result += vec3(noise) * 0.15;
+					
+					gl_FragColor = vec4(result, texel.a);
+				}
+				`,
 			});
 
 			const plane = new THREE.Mesh(geometry, this.material);
 			this.scene.add(plane);
-		}
-
-		loadTexture() {
-			const loader = new THREE.TextureLoader();
-			loader.load(
-				this.imageUrl,
-				(texture) => {
-					texture.premultiplyAlpha = false;
-					this.material.uniforms.tDiffuse.value = texture;
-					this.container.classList.add("loaded");
-				},
-				undefined,
-				(err) => {
-					console.error("Error loading texture:", err);
-				}
-			);
+			this.container.classList.add("loaded");
 		}
 
 		animate() {
@@ -114,24 +126,37 @@ const { imageUrl, isMobile = false } = Astro.props;
 			this.material.uniforms.time.value = performance.now() / 1000;
 			this.renderer.render(this.scene, this.camera);
 		}
+		
+		updateSize() {
+			// Get current dimensions
+			const containerRect = this.container.getBoundingClientRect();
+			this.width = containerRect.width - 100;
+			this.height = containerRect.height- 100;
+			
+			// Update renderer size
+			this.renderer.setSize(this.width, this.height);
+			
+			// Calculate aspect ratio
+			const aspect = this.width / this.height;
+			// Update camera to maintain proper aspect ratio
+			this.camera.left = -1 * aspect;
+			this.camera.right = 1 * aspect;
+			this.camera.updateProjectionMatrix();
+		}
 
 		setupResizeListener() {
-			window.addEventListener("resize", () => {
-				this.width = this.container.offsetWidth;
-				this.height = this.container.offsetHeight;
-
-				// For OrthographicCamera, we need to update the frustum instead of aspect
-				// This maintains the aspect ratio without stretching
-				const aspect = this.width / this.height;
-
-				// Keep the vertical size fixed and adjust horizontal based on aspect ratio
-				this.camera.left = -1 * aspect;
-				this.camera.right = 1 * aspect;
-				// Vertical remains as -1 to 1
-
-				this.camera.updateProjectionMatrix();
-				this.renderer.setSize(this.width, this.height);
-			});
+			// Use ResizeObserver for more accurate size tracking
+			if (typeof ResizeObserver !== 'undefined') {
+				const resizeObserver = new ResizeObserver(() => {
+					this.updateSize();
+				});
+				resizeObserver.observe(this.container);
+			} else {
+				// Fallback to window resize event
+				window.addEventListener("resize", () => {
+					this.updateSize();
+				});
+			}
 		}
 	}
 
@@ -143,64 +168,27 @@ const { imageUrl, isMobile = false } = Astro.props;
 
 		containers.forEach((container) => {
 			if (!(container instanceof HTMLElement)) return;
-
-			const imageUrl = container.getAttribute("data-image-url");
-			if (imageUrl) {
-				new CRTEffect(container, imageUrl);
-			} else {
-				console.error("No image URL provided for CRT effect");
-			}
+			new CRTEffect(container);
 		});
 	});
 </script>
 
 <style>
-	.crt-container {
-		position: absolute !important;
-		inset: 0 !important;
-		width: 100% !important;
-		height: 100% !important;
-		overflow: hidden;
-		background: transparent;
-		z-index: 1;
-	}
-
+	.crt-container,
 	.crt-container-mobile {
-		position: absolute !important;
-		inset: 0 !important;
-		width: 100% !important;
-		height: 100% !important;
-		overflow: hidden;
-		background: transparent;
-		z-index: 1;
-	}
-
-	.crt-container::before,
-	.crt-container-mobile::before {
-		content: "Loading...";
-		color: #ffffff;
-		opacity: 0.5;
-		font-size: 14px;
 		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		transition: opacity 0.3s ease;
-		z-index: 2;
+		inset: 0;
+		z-index: 5;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
-
-	.crt-container.loaded::before,
-	.crt-container-mobile.loaded::before {
-		opacity: 0;
-	}
-
+	
 	.crt-container canvas,
 	.crt-container-mobile canvas {
-		position: absolute !important;
-		inset: 0 !important;
-		width: 100% !important;
-		height: 100% !important;
-		z-index: 1 !important;
-		pointer-events: none;
+		width: 100%;
+		height: 100%;
+		display: block;
 	}
 </style>
