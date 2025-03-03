@@ -26,19 +26,6 @@ const {
 
 <script>
 	import * as THREE from "three";
-	import {
-		meshStandardVertexShader,
-		meshStandardFragmentShader,
-		sdfTextVertexShader,
-		sdfTextFragmentShader,
-		luminanceVertexShader,
-		luminanceFragmentShader,
-		kawaseBlurVertexShader,
-		kawaseBlurFragmentShader,
-		copyVertexShader,
-		copyFragmentShader,
-		ShaderLib
-	} from '../shaders';
 
 	declare class FontFaceObserver {
 		constructor(family: string);
@@ -53,15 +40,10 @@ const {
 		camera: THREE.OrthographicCamera = new THREE.OrthographicCamera();
 		renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer();
 		material: THREE.ShaderMaterial = new THREE.ShaderMaterial();
-		luminancePass: THREE.ShaderMaterial = new THREE.ShaderMaterial();
-		blurPass: THREE.ShaderMaterial = new THREE.ShaderMaterial();
-		copyPass: THREE.ShaderMaterial = new THREE.ShaderMaterial();
-		renderTarget1: THREE.WebGLRenderTarget = new THREE.WebGLRenderTarget(1, 1);
-		renderTarget2: THREE.WebGLRenderTarget = new THREE.WebGLRenderTarget(1, 1);
 
 		constructor(container: HTMLElement) {
 			this.container = container;
-			this.width = Math.max(container.clientWidth, 1);  // Ensure non-zero dimensions
+			this.width = Math.max(container.clientWidth, 1);
 			this.height = Math.max(container.clientHeight, 1);
 			
 			this.setupScene();
@@ -109,45 +91,13 @@ const {
 								};
 							});
 					}
-
-					this.initRenderTargets();
 					this.animate();
 				});
 			} else {
-				this.initRenderTargets();
 				this.animate();
 			}
 
 			this.setupResizeListener();
-		}
-
-		initRenderTargets() {
-			// Ensure minimum dimensions
-			const width = Math.max(this.width, 1);
-			const height = Math.max(this.height, 1);
-
-			// Create or update render targets
-			if (this.renderTarget1) {
-				this.renderTarget1.dispose();
-			}
-			if (this.renderTarget2) {
-				this.renderTarget2.dispose();
-			}
-
-			this.renderTarget1 = new THREE.WebGLRenderTarget(width, height, {
-				minFilter: THREE.LinearFilter,
-				magFilter: THREE.LinearFilter,
-				format: THREE.RGBAFormat,
-				stencilBuffer: false,
-				depthBuffer: false
-			});
-			
-			this.renderTarget2 = this.renderTarget1.clone();
-
-			// Update blur pass texel size
-			if (this.blurPass) {
-				this.blurPass.uniforms.texelSize.value.set(1 / width, 1 / height);
-			}
 		}
 
 		createTextTexture(text: string, subText: string | null) {
@@ -232,15 +182,15 @@ const {
 
 			const geometry = new THREE.PlaneGeometry(2, 2);
 
-			// Create materials for each pass
+			// Create material
 			this.material = new THREE.ShaderMaterial({
 				uniforms: {
 					tDiffuse: { value: null },
 					tText: { value: null },
 					time: { value: 0.0 },
-					sIntensity: { value: 0.3 },
+					sIntensity: { value: 0.7 },
 					sCount: { value: 1200 },
-					nIntensity: { value: 0.4 },
+					nIntensity: { value: 0.2 },
 					vIntensity: { value: 0.4 },
 					brightness: { value: 1.1 },
 					scanSpeed: { value: 0.25 },
@@ -311,10 +261,12 @@ const {
 						// Composite the effects
 						vec3 result = color;
 						result *= scanline * vig * brightness;
+						
+						// Apply noise uniformly
 						result += vec3(noise);
 						
 						// Get text with proper positioning - now using distorted UVs
-						vec4 textColor = texture2D(tText, distortedUv);  // Changed from vUv to distortedUv
+						vec4 textColor = texture2D(tText, distortedUv);
 						
 						// Overlay text if present
 						result = mix(result, textColor.rgb, textColor.a * 0.9);
@@ -325,42 +277,6 @@ const {
 				transparent: false
 			});
 
-			this.luminancePass = new THREE.ShaderMaterial({
-				uniforms: {
-					tDiffuse: { value: null },
-					luminanceThreshold: { value: 0.8 },
-					smoothWidth: { value: 0.2 }
-				},
-				vertexShader: `
-					varying vec2 vUv;
-					void main() {
-						vUv = uv;
-						gl_Position = vec4(position, 1.0);
-					}
-				`,
-				fragmentShader: luminanceFragmentShader
-			});
-
-			this.blurPass = new THREE.ShaderMaterial({
-				uniforms: {
-					tDiffuse: { value: null },
-					texelSize: { value: new THREE.Vector2(1 / this.width, 1 / this.height) },
-					kernel: { value: 4.0 },
-					scale: { value: 1.0 }
-				},
-				vertexShader: kawaseBlurVertexShader,
-				fragmentShader: kawaseBlurFragmentShader
-			});
-
-			this.copyPass = new THREE.ShaderMaterial({
-				uniforms: {
-					tDiffuse: { value: null },
-					opacity: { value: 1.0 }
-				},
-				vertexShader: copyVertexShader,
-				fragmentShader: copyFragmentShader
-			});
-
 			const plane = new THREE.Mesh(geometry, this.material);
 			this.scene.add(plane);
 			this.container.classList.add("loaded");
@@ -368,50 +284,12 @@ const {
 
 		animate() {
 			requestAnimationFrame(this.animate.bind(this));
-			
 			const time = performance.now() / 1000;
 			this.material.uniforms.time.value = time;
-			
-			// Render main scene to first render target
-			this.renderer.setRenderTarget(this.renderTarget1);
 			this.renderer.render(this.scene, this.camera);
-			
-			// Apply luminance pass
-			this.luminancePass.uniforms.tDiffuse.value = this.renderTarget1.texture;
-			this.renderer.setRenderTarget(this.renderTarget2);
-			this.renderer.render(this.scene, this.camera);
-			
-			// Apply blur pass
-			this.blurPass.uniforms.tDiffuse.value = this.renderTarget2.texture;
-			this.renderer.setRenderTarget(this.renderTarget1);
-			this.renderer.render(this.scene, this.camera);
-			
-			// Final composite with copy pass
-			this.copyPass.uniforms.tDiffuse.value = this.renderTarget1.texture;
-			this.renderer.setRenderTarget(null);
-			this.renderer.render(this.scene, this.camera);
-		}
-
-		updateSize() {
-			// Get current dimensions
-			const containerRect = this.container.getBoundingClientRect();
-			this.width = Math.max(containerRect.width, 1);  // Ensure non-zero dimensions
-			this.height = Math.max(containerRect.height, 1);
-
-			// Update renderer and render targets
-			this.renderer.setSize(this.width, this.height);
-			this.initRenderTargets();  // Reinitialize render targets with new size
-
-			// Calculate aspect ratio
-			const aspect = this.width / this.height;
-			// Update camera to maintain proper aspect ratio
-			this.camera.left = -1 * aspect;
-			this.camera.right = 1 * aspect;
-			this.camera.updateProjectionMatrix();
 		}
 
 		setupResizeListener() {
-			// Debounce function
 			const debounce = (func: Function, wait: number) => {
 				let timeout: number | null = null;
 				return (...args: any[]) => {
@@ -425,32 +303,31 @@ const {
 				};
 			};
 
-			// Debounced update function
 			const debouncedUpdate = debounce(() => {
 				this.updateSize();
-			}, 100); // 100ms debounce delay
+			}, 100);
 
-			// Use ResizeObserver for more accurate size tracking
 			if (typeof ResizeObserver !== "undefined") {
 				const resizeObserver = new ResizeObserver(() => {
 					debouncedUpdate();
 				});
 				resizeObserver.observe(this.container);
 			} else {
-				// Fallback to window resize event
 				window.addEventListener("resize", () => {
 					debouncedUpdate();
 				});
 			}
 		}
+
+		updateSize() {
+			this.width = Math.max(this.container.clientWidth, 1);
+			this.height = Math.max(this.container.clientHeight, 1);
+			this.renderer.setSize(this.width, this.height);
+		}
 	}
 
-	// Initialize all CRT effects when the DOM is ready
 	document.addEventListener("DOMContentLoaded", () => {
-		const containers = document.querySelectorAll(
-			".crt-container, .crt-container-mobile"
-		);
-
+		const containers = document.querySelectorAll(".crt-container, .crt-container-mobile");
 		containers.forEach((container) => {
 			if (!(container instanceof HTMLElement)) return;
 			new CRTEffect(container);
