@@ -26,6 +26,19 @@ const {
 
 <script>
 	import * as THREE from "three";
+	import {
+		meshStandardVertexShader,
+		meshStandardFragmentShader,
+		sdfTextVertexShader,
+		sdfTextFragmentShader,
+		luminanceVertexShader,
+		luminanceFragmentShader,
+		kawaseBlurVertexShader,
+		kawaseBlurFragmentShader,
+		copyVertexShader,
+		copyFragmentShader,
+		ShaderLib
+	} from '../shaders';
 
 	declare class FontFaceObserver {
 		constructor(family: string);
@@ -40,11 +53,17 @@ const {
 		camera: THREE.OrthographicCamera = new THREE.OrthographicCamera();
 		renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer();
 		material: THREE.ShaderMaterial = new THREE.ShaderMaterial();
+		luminancePass: THREE.ShaderMaterial = new THREE.ShaderMaterial();
+		blurPass: THREE.ShaderMaterial = new THREE.ShaderMaterial();
+		copyPass: THREE.ShaderMaterial = new THREE.ShaderMaterial();
+		renderTarget1: THREE.WebGLRenderTarget = new THREE.WebGLRenderTarget(1, 1);
+		renderTarget2: THREE.WebGLRenderTarget = new THREE.WebGLRenderTarget(1, 1);
 
 		constructor(container: HTMLElement) {
 			this.container = container;
-			this.width = container.clientWidth;
-			this.height = container.clientHeight;
+			this.width = Math.max(container.clientWidth, 1);  // Ensure non-zero dimensions
+			this.height = Math.max(container.clientHeight, 1);
+			
 			this.setupScene();
 
 			// Load the image before animation
@@ -91,13 +110,44 @@ const {
 							});
 					}
 
+					this.initRenderTargets();
 					this.animate();
 				});
 			} else {
+				this.initRenderTargets();
 				this.animate();
 			}
 
 			this.setupResizeListener();
+		}
+
+		initRenderTargets() {
+			// Ensure minimum dimensions
+			const width = Math.max(this.width, 1);
+			const height = Math.max(this.height, 1);
+
+			// Create or update render targets
+			if (this.renderTarget1) {
+				this.renderTarget1.dispose();
+			}
+			if (this.renderTarget2) {
+				this.renderTarget2.dispose();
+			}
+
+			this.renderTarget1 = new THREE.WebGLRenderTarget(width, height, {
+				minFilter: THREE.LinearFilter,
+				magFilter: THREE.LinearFilter,
+				format: THREE.RGBAFormat,
+				stencilBuffer: false,
+				depthBuffer: false
+			});
+			
+			this.renderTarget2 = this.renderTarget1.clone();
+
+			// Update blur pass texel size
+			if (this.blurPass) {
+				this.blurPass.uniforms.texelSize.value.set(1 / width, 1 / height);
+			}
 		}
 
 		createTextTexture(text: string, subText: string | null) {
@@ -130,7 +180,7 @@ const {
 
 				// Draw main text with VT323 font
 				ctx.fillStyle = "white";
-				ctx.font = "28px VT323"; // Removed "bold" and quotes, increased size
+				ctx.font = "28px VT323";
 				ctx.fillText(
 					text.toUpperCase(),
 					leftPadding + 20,
@@ -151,7 +201,7 @@ const {
 
 				// Draw subtext if provided with VT323 font
 				if (subText) {
-					ctx.font = "20px VT323"; // Removed quotes, increased size
+					ctx.font = "20px VT323";
 					ctx.fillText(
 						subText.toUpperCase(),
 						leftPadding + 20,
@@ -182,74 +232,133 @@ const {
 
 			const geometry = new THREE.PlaneGeometry(2, 2);
 
-			// Modified shader material to match ElevenLabs hackathon site
+			// Create materials for each pass
 			this.material = new THREE.ShaderMaterial({
 				uniforms: {
-					tDiffuse: { value: null }, // Image texture
-					tText: { value: null }, // Text texture
+					tDiffuse: { value: null },
+					tText: { value: null },
 					time: { value: 0.0 },
-					sIntensity: { value: 0.3 }, // Scanline intensity
-					sCount: { value: 1200 }, // Scanline count
-					nIntensity: { value: 0.25 }, // Noise intensity
-					vIntensity: { value: 0.4 }, // Vignette intensity
-					brightness: { value: 1.1 }, // Overall brightness
+					sIntensity: { value: 0.3 },
+					sCount: { value: 1200 },
+					nIntensity: { value: 0.4 },
+					vIntensity: { value: 0.4 },
+					brightness: { value: 1.1 },
+					scanSpeed: { value: 0.25 },
+					scanWidth: { value: 0.03 },
+					pixelShift: { value: 0.025 }
 				},
-				transparent: false,
 				vertexShader: `
-				varying vec2 vUv;
-				void main() {
-					vUv = uv;
-					gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-				}
+					varying vec2 vUv;
+					void main() {
+						vUv = uv;
+						gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+					}
 				`,
 				fragmentShader: `
-				uniform sampler2D tDiffuse;
-				uniform sampler2D tText;
-				uniform float time;
-				uniform float sIntensity;
-				uniform float sCount;
-				uniform float nIntensity; 
-				uniform float vIntensity;
-				uniform float brightness;
-				varying vec2 vUv;
+					uniform sampler2D tDiffuse;
+					uniform sampler2D tText;
+					uniform float time;
+					uniform float sIntensity;
+					uniform float sCount;
+					uniform float nIntensity;
+					uniform float vIntensity;
+					uniform float brightness;
+					uniform float scanSpeed;
+					uniform float scanWidth;
+					uniform float pixelShift;
+					varying vec2 vUv;
 
-				// Random function for noise
-				float random(vec2 c) {
-					return fract(sin(dot(c.xy, vec2(12.9898, 78.233))) * 43758.5453);
-				}
+					float random(vec2 c) {
+						return fract(sin(dot(c.xy, vec2(12.9898, 78.233))) * 43758.5453);
+					}
 
-				void main() {
-					vec2 uv = vUv;
-					
-					// Get the image color
-					vec4 texel = texture2D(tDiffuse, uv);
-					
-					// Create moving scanline effect (horizontal lines rolling down)
-					float scanlinePos = mod(time * 0.5, 1.0);
-					float scanline = 0.5 + 0.5 * sin((uv.y + scanlinePos) * sCount);
-					scanline = 1.0 - (scanline * sIntensity);
-					
-					// Create static noise effect
-					float noise = random(uv + vec2(time * 0.01)) * nIntensity;
-					
-					// Create vignette effect (darker edges)
-					float vig = 1.0 - vIntensity * max(abs(uv.x - 0.5) * 2.0, abs(uv.y - 0.5) * 2.0);
-					vig = pow(vig, 2.0);
-					
-					// Composite the effects
-					vec3 result = texel.rgb;
-					result *= scanline * vig * brightness;
-					result += vec3(noise);
-					
-					// Get text with proper positioning
-					vec4 textColor = texture2D(tText, uv);
-					
-					// Overlay text if present
-					result = mix(result, textColor.rgb, textColor.a * 0.9);
-					
-					gl_FragColor = vec4(result, 1.0);
-				}
+					void main() {
+						vec2 uv = vUv;
+						
+						// Scanning line distortion
+						float scanPos = 1.0 - mod(time * scanSpeed, 1.0 + scanWidth * 2.0) + scanWidth;
+						float scanEffect = smoothstep(scanPos - scanWidth, scanPos, uv.y) - 
+										smoothstep(scanPos, scanPos + scanWidth, uv.y);
+						
+						// Apply horizontal shift at scan line
+						vec2 distortedUv = uv;
+						distortedUv.x += scanEffect * pixelShift;
+						
+						// Sample texture with distortion
+						vec4 texel = texture2D(tDiffuse, distortedUv);
+						
+						// Create rolling scanlines
+						float scanline = 0.5 + 0.5 * sin((uv.y + mod(time * 0.5, 1.0)) * sCount);
+						scanline = 1.0 - (scanline * sIntensity);
+						
+						// Create static noise effect
+						float noise = random(uv + vec2(time * 0.01)) * nIntensity;
+						
+						// Create rectangular vignette effect
+						vec2 vignetteUv = abs(uv - 0.5) * 2.0;
+						float vig = 1.0 - vIntensity * max(vignetteUv.x, vignetteUv.y);
+						vig = pow(vig, 2.0);
+						
+						// Add chromatic aberration
+						float aberration = 0.003;
+						vec2 uvR = distortedUv + vec2(aberration, 0.0);
+						vec2 uvB = distortedUv - vec2(aberration, 0.0);
+						vec3 color;
+						color.r = texture2D(tDiffuse, uvR).r;
+						color.g = texel.g;
+						color.b = texture2D(tDiffuse, uvB).b;
+						
+						// Composite the effects
+						vec3 result = color;
+						result *= scanline * vig * brightness;
+						result += vec3(noise);
+						
+						// Get text with proper positioning - now using distorted UVs
+						vec4 textColor = texture2D(tText, distortedUv);  // Changed from vUv to distortedUv
+						
+						// Overlay text if present
+						result = mix(result, textColor.rgb, textColor.a * 0.9);
+						
+						gl_FragColor = vec4(result, 1.0);
+					}
 				`,
+				transparent: false
+			});
+
+			this.luminancePass = new THREE.ShaderMaterial({
+				uniforms: {
+					tDiffuse: { value: null },
+					luminanceThreshold: { value: 0.8 },
+					smoothWidth: { value: 0.2 }
+				},
+				vertexShader: `
+					varying vec2 vUv;
+					void main() {
+						vUv = uv;
+						gl_Position = vec4(position, 1.0);
+					}
+				`,
+				fragmentShader: luminanceFragmentShader
+			});
+
+			this.blurPass = new THREE.ShaderMaterial({
+				uniforms: {
+					tDiffuse: { value: null },
+					texelSize: { value: new THREE.Vector2(1 / this.width, 1 / this.height) },
+					kernel: { value: 4.0 },
+					scale: { value: 1.0 }
+				},
+				vertexShader: kawaseBlurVertexShader,
+				fragmentShader: kawaseBlurFragmentShader
+			});
+
+			this.copyPass = new THREE.ShaderMaterial({
+				uniforms: {
+					tDiffuse: { value: null },
+					opacity: { value: 1.0 }
+				},
+				vertexShader: copyVertexShader,
+				fragmentShader: copyFragmentShader
 			});
 
 			const plane = new THREE.Mesh(geometry, this.material);
@@ -259,18 +368,39 @@ const {
 
 		animate() {
 			requestAnimationFrame(this.animate.bind(this));
-			this.material.uniforms.time.value = performance.now() / 1000;
+			
+			const time = performance.now() / 1000;
+			this.material.uniforms.time.value = time;
+			
+			// Render main scene to first render target
+			this.renderer.setRenderTarget(this.renderTarget1);
+			this.renderer.render(this.scene, this.camera);
+			
+			// Apply luminance pass
+			this.luminancePass.uniforms.tDiffuse.value = this.renderTarget1.texture;
+			this.renderer.setRenderTarget(this.renderTarget2);
+			this.renderer.render(this.scene, this.camera);
+			
+			// Apply blur pass
+			this.blurPass.uniforms.tDiffuse.value = this.renderTarget2.texture;
+			this.renderer.setRenderTarget(this.renderTarget1);
+			this.renderer.render(this.scene, this.camera);
+			
+			// Final composite with copy pass
+			this.copyPass.uniforms.tDiffuse.value = this.renderTarget1.texture;
+			this.renderer.setRenderTarget(null);
 			this.renderer.render(this.scene, this.camera);
 		}
 
 		updateSize() {
 			// Get current dimensions
 			const containerRect = this.container.getBoundingClientRect();
-			this.width = containerRect.width;
-			this.height = containerRect.height;
+			this.width = Math.max(containerRect.width, 1);  // Ensure non-zero dimensions
+			this.height = Math.max(containerRect.height, 1);
 
-			// Update renderer size
+			// Update renderer and render targets
 			this.renderer.setSize(this.width, this.height);
+			this.initRenderTargets();  // Reinitialize render targets with new size
 
 			// Calculate aspect ratio
 			const aspect = this.width / this.height;
