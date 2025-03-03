@@ -36,3 +36,11 @@
 	left: 0;
 	opacity: 0.75;
 }
+
+.tab-content {
+	display: none;
+
+	&.active {
+		display: block;
+	}
+}

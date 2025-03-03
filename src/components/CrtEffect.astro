@@ -1,15 +1,36 @@
 ---
 // Props for the component
-const { isMobile = false, class: className } = Astro.props;
+const {
+	isMobile = false,
+	class: className,
+	text = "",
+	subText = "",
+} = Astro.props;
 ---
 
 <div
 	class={`${isMobile ? "crt-container-mobile" : "crt-container"} ${className || ""}`}
-	data-image-url={Astro.props.imageUrl}>
+	data-image-url={Astro.props.imageUrl}
+	data-text={text}
+	data-subtext={subText}>
 </div>
+
+<!-- Add Google Font -->
+<link
+	href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
+	rel="stylesheet"
+/>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.3.0/fontfaceobserver.js"
+></script>
 
 <script>
 	import * as THREE from "three";
+
+	declare class FontFaceObserver {
+		constructor(family: string);
+		load(): Promise<void>;
+	}
 
 	class CRTEffect {
 		container: HTMLElement;
@@ -25,25 +46,123 @@ const { isMobile = false, class: className } = Astro.props;
 			this.width = container.clientWidth;
 			this.height = container.clientHeight;
 			this.setupScene();
-			
+
 			// Load the image before animation
-			const imageUrl = container.getAttribute('data-image-url');
+			const imageUrl = container.getAttribute("data-image-url");
 			if (imageUrl) {
 				const loader = new THREE.TextureLoader();
 				loader.load(imageUrl, (texture) => {
-					// Set texture wrapping and repeat to avoid stretching
+					// Set texture parameters for proper scaling
 					texture.wrapS = THREE.ClampToEdgeWrapping;
 					texture.wrapT = THREE.ClampToEdgeWrapping;
+					texture.minFilter = THREE.LinearFilter;
+					texture.magFilter = THREE.LinearFilter;
+
 					this.material.uniforms.tDiffuse = { value: texture };
+
+					// Create text texture if text is provided
+					const text = container.getAttribute("data-text");
+					const subText = container.getAttribute("data-subtext");
+					if (text) {
+						// Load font before creating text texture
+						const font = new FontFaceObserver("VT323");
+						font.load()
+							.then(() => {
+								const textTexture = this.createTextTexture(
+									text,
+									subText
+								);
+								this.material.uniforms.tText = {
+									value: textTexture,
+								};
+							})
+							.catch((error: Error) => {
+								console.warn(
+									"Font loading failed, falling back to monospace:",
+									error
+								);
+								const textTexture = this.createTextTexture(
+									text,
+									subText
+								);
+								this.material.uniforms.tText = {
+									value: textTexture,
+								};
+							});
+					}
+
 					this.animate();
-					// Trigger initial resize to ensure proper fitting
-					this.updateSize();
 				});
 			} else {
 				this.animate();
 			}
-			
+
 			this.setupResizeListener();
+		}
+
+		createTextTexture(text: string, subText: string | null) {
+			// Create a canvas for text
+			const canvas = document.createElement("canvas");
+			canvas.width = 512;
+			canvas.height = 512;
+			const ctx = canvas.getContext("2d");
+
+			if (ctx) {
+				// Clear with transparent background
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+				// Position text at bottom with padding
+				const bottomPadding = 40;
+				const leftPadding = 40;
+				const boxWidth = canvas.width - leftPadding * 2;
+
+				// Draw text box border with margin
+				ctx.strokeStyle = "white";
+				ctx.lineWidth = 1;
+				ctx.beginPath();
+				ctx.rect(
+					leftPadding,
+					canvas.height - bottomPadding - 80,
+					boxWidth,
+					70
+				);
+				ctx.stroke();
+
+				// Draw main text with VT323 font
+				ctx.fillStyle = "white";
+				ctx.font = "28px VT323"; // Removed "bold" and quotes, increased size
+				ctx.fillText(
+					text.toUpperCase(),
+					leftPadding + 20,
+					canvas.height - bottomPadding - 45
+				);
+
+				// Draw horizontal line below main text
+				ctx.beginPath();
+				ctx.moveTo(
+					leftPadding + 10,
+					canvas.height - bottomPadding - 40
+				);
+				ctx.lineTo(
+					leftPadding + boxWidth - 10,
+					canvas.height - bottomPadding - 40
+				);
+				ctx.stroke();
+
+				// Draw subtext if provided with VT323 font
+				if (subText) {
+					ctx.font = "20px VT323"; // Removed quotes, increased size
+					ctx.fillText(
+						subText.toUpperCase(),
+						leftPadding + 20,
+						canvas.height - bottomPadding - 20
+					);
+				}
+			}
+
+			const texture = new THREE.CanvasTexture(canvas);
+			texture.needsUpdate = true;
+			return texture;
 		}
 
 		setupScene() {
@@ -53,27 +172,29 @@ const { isMobile = false, class: className } = Astro.props;
 
 			this.renderer = new THREE.WebGLRenderer({
 				antialias: false,
-				alpha: true,
+				alpha: false,
 				premultipliedAlpha: false,
 			});
 			this.renderer.setSize(this.width, this.height);
 			this.renderer.setPixelRatio(window.devicePixelRatio);
-			this.renderer.setClearColor(0x000000, 0);
+			this.renderer.setClearColor(0x000000, 1);
 			this.container.appendChild(this.renderer.domElement);
 
 			const geometry = new THREE.PlaneGeometry(2, 2);
 
-			// Modified shader material to create CRT effects with improved brightness and moving scan lines
+			// Modified shader material to match ElevenLabs hackathon site
 			this.material = new THREE.ShaderMaterial({
 				uniforms: {
-					tDiffuse: { value: null }, // Texture will be set after loading
+					tDiffuse: { value: null }, // Image texture
+					tText: { value: null }, // Text texture
 					time: { value: 0.0 },
-					sIntensity: { value: 0.08 }, // Reduced for subtler scan lines
-					sCount: { value: 800 }, // More lines for smoother effect
-					nIntensity: { value: 0.15 }, // Adjusted noise
-					brightness: { value: 1.0 }, // Normal brightness
+					sIntensity: { value: 0.3 }, // Scanline intensity
+					sCount: { value: 1200 }, // Scanline count
+					nIntensity: { value: 0.25 }, // Noise intensity
+					vIntensity: { value: 0.4 }, // Vignette intensity
+					brightness: { value: 1.1 }, // Overall brightness
 				},
-				transparent: true,
+				transparent: false,
 				vertexShader: `
 				varying vec2 vUv;
 				void main() {
@@ -83,35 +204,50 @@ const { isMobile = false, class: className } = Astro.props;
 				`,
 				fragmentShader: `
 				uniform sampler2D tDiffuse;
+				uniform sampler2D tText;
 				uniform float time;
 				uniform float sIntensity;
 				uniform float sCount;
-				uniform float nIntensity;
+				uniform float nIntensity; 
+				uniform float vIntensity;
 				uniform float brightness;
 				varying vec2 vUv;
 
+				// Random function for noise
 				float random(vec2 c) {
-					return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
+					return fract(sin(dot(c.xy, vec2(12.9898, 78.233))) * 43758.5453);
 				}
 
 				void main() {
 					vec2 uv = vUv;
 					
-					// Get the original texture color
+					// Get the image color
 					vec4 texel = texture2D(tDiffuse, uv);
 					
-					// Create moving scanline effect (top to bottom) - slower speed
-					float scanline = 0.5 + 0.5 * sin(uv.y * sCount - time * 0.8);
+					// Create moving scanline effect (horizontal lines rolling down)
+					float scanlinePos = mod(time * 0.5, 1.0);
+					float scanline = 0.5 + 0.5 * sin((uv.y + scanlinePos) * sCount);
 					scanline = 1.0 - (scanline * sIntensity);
 					
-					// Create noise effect
-					float noise = random(uv + vec2(time * 0.001)) * nIntensity;
+					// Create static noise effect
+					float noise = random(uv + vec2(time * 0.01)) * nIntensity;
 					
-					// Apply effects while preserving original colors
-					vec3 result = texel.rgb * scanline * brightness;
-					result += vec3(noise) * 0.15;
+					// Create vignette effect (darker edges)
+					float vig = 1.0 - vIntensity * max(abs(uv.x - 0.5) * 2.0, abs(uv.y - 0.5) * 2.0);
+					vig = pow(vig, 2.0);
 					
-					gl_FragColor = vec4(result, texel.a);
+					// Composite the effects
+					vec3 result = texel.rgb;
+					result *= scanline * vig * brightness;
+					result += vec3(noise);
+					
+					// Get text with proper positioning
+					vec4 textColor = texture2D(tText, uv);
+					
+					// Overlay text if present
+					result = mix(result, textColor.rgb, textColor.a * 0.9);
+					
+					gl_FragColor = vec4(result, 1.0);
 				}
 				`,
 			});
@@ -126,16 +262,16 @@ const { isMobile = false, class: className } = Astro.props;
 			this.material.uniforms.time.value = performance.now() / 1000;
 			this.renderer.render(this.scene, this.camera);
 		}
-		
+
 		updateSize() {
 			// Get current dimensions
 			const containerRect = this.container.getBoundingClientRect();
-			this.width = containerRect.width - 100;
-			this.height = containerRect.height- 100;
-			
+			this.width = containerRect.width;
+			this.height = containerRect.height;
+
 			// Update renderer size
 			this.renderer.setSize(this.width, this.height);
-			
+
 			// Calculate aspect ratio
 			const aspect = this.width / this.height;
 			// Update camera to maintain proper aspect ratio
@@ -145,16 +281,35 @@ const { isMobile = false, class: className } = Astro.props;
 		}
 
 		setupResizeListener() {
+			// Debounce function
+			const debounce = (func: Function, wait: number) => {
+				let timeout: number | null = null;
+				return (...args: any[]) => {
+					if (timeout !== null) {
+						window.clearTimeout(timeout);
+					}
+					timeout = window.setTimeout(() => {
+						func.apply(this, args);
+						timeout = null;
+					}, wait);
+				};
+			};
+
+			// Debounced update function
+			const debouncedUpdate = debounce(() => {
+				this.updateSize();
+			}, 100); // 100ms debounce delay
+
 			// Use ResizeObserver for more accurate size tracking
-			if (typeof ResizeObserver !== 'undefined') {
+			if (typeof ResizeObserver !== "undefined") {
 				const resizeObserver = new ResizeObserver(() => {
-					this.updateSize();
+					debouncedUpdate();
 				});
 				resizeObserver.observe(this.container);
 			} else {
 				// Fallback to window resize event
 				window.addEventListener("resize", () => {
-					this.updateSize();
+					debouncedUpdate();
 				});
 			}
 		}
@@ -183,12 +338,16 @@ const { isMobile = false, class: className } = Astro.props;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		width: 100%;
+		height: 100%;
+		border-radius: inherit;
 	}
-	
+
 	.crt-container canvas,
 	.crt-container-mobile canvas {
 		width: 100%;
 		height: 100%;
 		display: block;
+		object-fit: cover;
 	}
 </style>

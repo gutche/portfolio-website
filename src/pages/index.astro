@@ -6,7 +6,6 @@ import crtImage from "../assets/crt.png";
 import profileImage from "../assets/profile.png";
 import CrtEffect from "../components/CrtEffect.astro";
 const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
-let activeTab = "info";
 ---
 
 <Layout>
@@ -59,31 +58,23 @@ let activeTab = "info";
 								{
 									tabs.map((tab) => (
 										<button
-											class={`tab-button ${tab === activeTab ? "active" : ""} relative text-left text-uppercase whitespace-nowrap uppercase text-sm data-[state=active]:opacity-100 opacity-50 focus max-md:border max-md:border-transparent max-md:data-[state=active]:border-gray-400 border-dotted max-md:px-1 max-md:pt-1 max-md:pb-0.5 cursor-pointer`}>
+											data-tab={tab}
+											class="tab-button relative text-left text-uppercase whitespace-nowrap uppercase text-sm opacity-50 focus max-md:border max-md:border-transparent border-dotted max-md:px-1 max-md:pt-1 max-md:pb-0.5 cursor-pointer"
+											aria-selected={
+												tab === "info"
+													? "true"
+													: "false"
+											}>
 											{tab.toUpperCase()}
 										</button>
 									))
 								}
 							</div>
-							<!-- Mobile CRT - Scaled down -->
+							<!-- Mobile CRT -->
 							<div class="w-full md:hidden">
 								<div
-									class="relative w-full aspect-square p-6 max-w-xs mx-auto">
-									<!-- 1. Base image -->
-									<img
-										src={profileImage.src}
-										alt="Profile"
-										class="absolute inset-0 w-full h-full object-contain z-1 py-[8px]"
-									/>
-
-									<!-- 2. CRT Effect with brightness -->
-									<CrtEffect
-										class="z-5"
-										isMobile={true}
-										brightness={1.2}
-									/>
-
-									<!-- 3. Monitor overlay -->
+									class="relative w-full aspect-square max-w-xs mx-auto">
+									<!-- Monitor overlay -->
 									<Image
 										alt="monitor"
 										loading="lazy"
@@ -92,21 +83,201 @@ let activeTab = "info";
 										sizes="100vw"
 										src={crtImage}
 									/>
+
+									<!-- CRT effect container -->
+									<div
+										class="absolute inset-[5%] rounded-2xl overflow-hidden z-5">
+										<CrtEffect
+											imageUrl={profileImage.src}
+											isMobile={true}
+											text="Gledrian Gutierrez"
+											subText="Software Engineer, ELEVENLABS"
+										/>
+									</div>
 								</div>
 							</div>
-							<div
-								tabindex="0"
-								class={`tab-content ${tabs[0] === activeTab ? "active" : ""} w-full focus`}
-								style="">
-								<div class="flex flex-col gap-4">
-									<p class="text-base">
-										Gledrian is a
-										<span
-											class="text-primary border-b border-dotted"
-											>Software Engineer</span
-										> with an unhealthy obession for tech and
-										sports.
-									</p>
+							<!-- Tab Content Sections -->
+							<div id="tab-content" class="w-full">
+								<!-- Info Tab -->
+								<div class="tab-panel" data-tab="info">
+									<div class="flex flex-col gap-4">
+										<p class="text-base">
+											Gledrian is a
+											<span
+												class="text-primary border-b border-dotted"
+												>Software Engineer</span
+											> with an unhealthy obession for tech
+											and sports.
+										</p>
+										<p class="text-base">
+											<a
+												href="#"
+												class="tab-link text-primary border-b border-dotted"
+												>Read more about me</a
+											>
+										</p>
+									</div>
+								</div>
+
+								<!-- Skills Tab -->
+								<div class="tab-panel hidden" data-tab="skills">
+									<div class="flex flex-col gap-4">
+										<p class="text-base">
+											Skills
+											<span
+												class="text-primary border-b border-dotted"
+												>Software Engineer</span
+											>
+										</p>
+										<ul class="list-disc pl-5 space-y-2">
+											<li>
+												Frontend Development (React,
+												Vue, Angular)
+											</li>
+											<li>
+												Backend Development (Node.js,
+												Python)
+											</li>
+											<li>
+												Cloud Infrastructure (AWS, GCP)
+											</li>
+											<li>
+												<a
+													href="#"
+													class="tab-link text-primary border-b border-dotted"
+													>View my certifications</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+
+								<!-- Projects Tab -->
+								<div
+									class="tab-panel hidden"
+									data-tab="projects">
+									<div class="flex flex-col gap-4">
+										<p class="text-base">
+											My projects include websites,
+											applications, and various tech
+											experiments. Here I'll showcase my
+											best work.
+										</p>
+										<ul class="list-disc pl-5 space-y-2">
+											<li>
+												<a
+													href="#"
+													class="tab-link text-primary border-b border-dotted"
+													>Voice AI Platform</a>
+											</li>
+											<li>
+												<a
+													href="#"
+													class="tab-link text-primary border-b border-dotted"
+													>Portfolio Website</a>
+											</li>
+											<li>
+												<a
+													href="#"
+													class="tab-link text-primary border-b border-dotted"
+													>E-commerce Solution</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+
+								<!-- Timeline Tab -->
+								<div
+									class="tab-panel hidden"
+									data-tab="timeline">
+									<div class="flex flex-col gap-4">
+										<p class="text-base">
+											My professional journey and key
+											milestones in my career as a
+											Software Engineer.
+										</p>
+										<div class="space-y-3">
+											<div>
+												<p class="font-bold">
+													2023 - Present
+												</p>
+												<p>
+													Software Engineer at <a
+														href="#"
+														class="tab-link text-primary border-b border-dotted"
+														>ELEVENLABS</a>
+												</p>
+											</div>
+											<div>
+												<p class="font-bold">
+													2020 - 2023
+												</p>
+												<p>
+													Senior Developer at <a
+														href="#"
+														class="tab-link text-primary border-b border-dotted"
+														>Tech Corp</a>
+												</p>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Socials Tab -->
+								<div
+									class="tab-panel hidden"
+									data-tab="socials">
+									<div class="flex flex-col gap-4">
+										<p class="text-base">
+											Connect with me on various social
+											platforms and professional networks.
+										</p>
+										<ul class="space-y-2">
+											<li>
+												<a
+													href="#"
+													class="tab-link text-primary border-b border-dotted"
+													>LinkedIn</a>
+											</li>
+											<li>
+												<a
+													href="#"
+													class="tab-link text-primary border-b border-dotted"
+													>GitHub</a>
+											</li>
+											<li>
+												<a
+													href="#"
+													class="tab-link text-primary border-b border-dotted"
+													>Twitter</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+
+								<!-- Contact Tab -->
+								<div
+									class="tab-panel hidden"
+									data-tab="contact">
+									<div class="flex flex-col gap-4">
+										<p class="text-base">
+											Reach out to me for collaborations,
+											opportunities, or just to say hello.
+										</p>
+										<p>
+											Email: <a
+												href="mailto:contact@example.com"
+												class="tab-link text-primary border-b border-dotted"
+												>contact@example.com</a
+											>
+										</p>
+										<p>
+											<a
+												href="#"
+												class="tab-link text-primary border-b border-dotted"
+												>Schedule a meeting</a
+											>
+										</p>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -165,36 +336,31 @@ let activeTab = "info";
 				<div class="h-screen w-px bg-black"></div>
 			</div>
 
-			<!-- Desktop CRT - Scaled down and brighter -->
+			<!-- Desktop CRT -->
 			<div class="hidden flex-1 md:flex items-center">
 				<div
 					style="position:relative;width:85%;padding-bottom:85%;margin:0 auto">
 					<div
 						style="position:absolute;top:0;right:0;bottom:0;left:0">
-						<div class="p-1 md:p-12 h-full">
-							<div class="relative h-full w-full p-6">
-								<div
-									class="h-full w-full rounded-3xl relative overflow-hidden">
-									<!-- 1. Base image with brightness filter -->
-									<img
-										src={profileImage.src}
-										alt="Profile"
-										class="absolute inset-0 w-full h-full z-1 left-1/2 bottom-0 transform -translate-x-1/2 object-contain py-[8px]"
-									/>
+						<div class="relative h-full w-full">
+							<!-- Monitor overlay -->
+							<Image
+								alt="monitor"
+								loading="lazy"
+								decoding="async"
+								class="select-none pointer-events-none absolute inset-0 w-full h-full z-10"
+								sizes="100vw"
+								src={crtImage}
+							/>
 
-									<!-- 2. CRT Effect with brightness parameter -->
-									<CrtEffect brightness={10.0} />
-
-									<!-- 3. Monitor overlay -->
-									<Image
-										alt="monitor"
-										loading="lazy"
-										decoding="async"
-										class="select-none pointer-events-none absolute inset-0 w-full h-full z-10"
-										sizes="100vw"
-										src={crtImage}
-									/>
-								</div>
+							<!-- CRT effect container -->
+							<div
+								class="absolute inset-[5%] rounded-3xl overflow-hidden z-5">
+								<CrtEffect
+									imageUrl={profileImage.src}
+									text="Gledrian Gutierrez"
+									subText="Software Engineer, ELEVENLABS"
+								/>
 							</div>
 						</div>
 					</div>
@@ -204,4 +370,137 @@ let activeTab = "info";
 		<div class="lines flex-1"></div>
 	</div>
 	<div class="noise"></div>
+
+	<!-- Audio elements for sound effects -->
+	<audio id="click-sound" src="/src/assets/click.wav" preload="auto"></audio>
+	<audio id="switch-sound" src="/src/assets/switch.wav" preload="auto"
+	></audio>
 </Layout>
+
+<script>
+	// Client-side JavaScript to handle tab functionality and sound effects
+	document.addEventListener("DOMContentLoaded", () => {
+		// Sound elements
+		const clickSound = document.getElementById(
+			"click-sound"
+		) as HTMLAudioElement;
+		const switchSound = document.getElementById(
+			"switch-sound"
+		) as HTMLAudioElement;
+
+		// Set volume for sound effects
+		if (clickSound) clickSound.volume = 0.5;
+		if (switchSound) switchSound.volume = 0.5;
+
+		const tabButtons = document.querySelectorAll(".tab-button");
+		const tabPanels = document.querySelectorAll(".tab-panel");
+		const tabLinks = document.querySelectorAll(".tab-link");
+
+		// Set the first tab as active by default
+		tabButtons[0].classList.add("opacity-100");
+		tabButtons[0].classList.add("max-md:border-gray-400");
+		tabPanels[0].classList.remove("hidden");
+
+		// Function to play click sound
+		const playClickSound = () => {
+			if (clickSound) {
+				clickSound.currentTime = 0; // Reset sound to start
+				clickSound
+					.play()
+					.catch((e) => console.log("Error playing sound:", e));
+			}
+		};
+
+		// Function to play switch sound
+		const playSwitchSound = () => {
+			if (switchSound) {
+				switchSound.currentTime = 0; // Reset sound to start
+				switchSound
+					.play()
+					.catch((e) => console.log("Error playing sound:", e));
+			}
+		};
+
+		// Add click event listeners to all tab buttons
+		tabButtons.forEach((button) => {
+			button.addEventListener("click", () => {
+				// Play click sound when tab is clicked
+				playClickSound();
+
+				const targetTab = button.getAttribute("data-tab");
+
+				// Remove active state from all buttons
+				tabButtons.forEach((btn) => {
+					btn.classList.remove("opacity-100");
+					btn.classList.remove("max-md:border-gray-400");
+					btn.setAttribute("aria-selected", "false");
+				});
+
+				// Add active state to clicked button
+				button.classList.add("opacity-100");
+				button.classList.add("max-md:border-gray-400");
+				button.setAttribute("aria-selected", "true");
+
+				// Hide all tab panels
+				tabPanels.forEach((panel) => {
+					panel.classList.add("hidden");
+				});
+
+				// Show the target tab panel
+				const activePanel = document.querySelector(
+					`.tab-panel[data-tab="${targetTab}"]`
+				);
+				if (activePanel) {
+					activePanel.classList.remove("hidden");
+				}
+			});
+		});
+
+		// Add click event listeners to all links inside tabs
+		tabLinks.forEach((link) => {
+			link.addEventListener("click", (e) => {
+				// Prevent default behavior to demo sound
+				e.preventDefault();
+
+				// Play switch sound when link is clicked
+				playSwitchSound();
+			});
+		});
+	});
+</script>
+
+<style>
+	/* Add any additional styles for tab functionality */
+	.tab-button[aria-selected="true"] {
+		opacity: 1;
+	}
+
+	.tab-button:focus {
+		outline: none;
+	}
+
+	@media (min-width: 768px) {
+		.tab-button::after {
+			content: "";
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			right: -8px;
+			width: 4px;
+			background: transparent;
+			transition: background-color 0.2s ease;
+		}
+
+		.tab-button[aria-selected="true"]::after {
+			background-color: white;
+		}
+	}
+
+	.tab-link {
+		transition: opacity 0.2s ease;
+	}
+
+	.tab-link:hover {
+		opacity: 0.8;
+	}
+</style>
