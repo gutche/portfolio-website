@@ -579,6 +579,85 @@ const projectsData = [
 				}
 			});
 		});
+
+		// Timeline click handler
+		const timelineItems = document.querySelectorAll('.timeline-item');
+
+		// Add selected class to first timeline item by default
+		const firstTimelineItem = document.querySelector('.timeline-item');
+		if (firstTimelineItem) {
+			firstTimelineItem.classList.add('selected');
+		}
+
+		timelineItems.forEach(item => {
+			item.addEventListener('click', () => {
+				// Remove selected class from all timeline items
+				timelineItems.forEach(timeline => {
+					timeline.classList.remove('selected');
+				});
+				
+				// Add selected class to clicked timeline item
+				item.classList.add('selected');
+				
+				const period = item.getAttribute('data-period');
+				const role = item.getAttribute('data-role');
+				const company = item.getAttribute('data-company');
+				
+				// Update desktop CRT
+				if (crtContainer && (crtContainer as any).crtEffect) {
+					(crtContainer as any).crtEffect.updateImage("/timeline.png");
+					(crtContainer as any).crtEffect.updateText(`${role} at ${company}`, period);
+				}
+				
+				// Update mobile CRT
+				if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
+					(mobileCrtContainer as any).crtEffect.updateImage("/timeline.png");
+					(mobileCrtContainer as any).crtEffect.updateText(`${role} at ${company}`, period);
+				}
+				
+				// Play switch sound
+				playSwitchSound();
+			});
+		});
+
+		// Social click handler
+		const socialItems = document.querySelectorAll('.social-item');
+
+		// Add selected class to first social item by default
+		const firstSocialItem = document.querySelector('.social-item');
+		if (firstSocialItem) {
+			firstSocialItem.classList.add('selected');
+		}
+
+		socialItems.forEach(item => {
+			item.addEventListener('click', () => {
+				// Remove selected class from all social items
+				socialItems.forEach(social => {
+					social.classList.remove('selected');
+				});
+				
+				// Add selected class to clicked social item
+				item.classList.add('selected');
+				
+				const name = item.getAttribute('data-name');
+				const url = item.getAttribute('data-url');
+				
+				// Update desktop CRT
+				if (crtContainer && (crtContainer as any).crtEffect) {
+					(crtContainer as any).crtEffect.updateImage("/social.png");
+					(crtContainer as any).crtEffect.updateText(name, url || '');
+				}
+				
+				// Update mobile CRT
+				if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
+					(mobileCrtContainer as any).crtEffect.updateImage("/social.png");
+					(mobileCrtContainer as any).crtEffect.updateText(name, url || '');
+				}
+				
+				// Play switch sound
+				playSwitchSound();
+			});
+		});
 	});
 </script>
 
