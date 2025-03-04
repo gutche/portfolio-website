@@ -1,0 +1,31 @@
+---
+import { type TimelineEntry, timeline } from '../../data/timeline';
+
+interface Props {
+    class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class:list={["tab-panel", className]} data-tab="timeline">
+    <div class="flex flex-col gap-4">
+        <p class="text-base">
+            My professional journey and key milestones in my career as a
+            Software Engineer.
+        </p>
+        <div class="space-y-3">
+            {timeline.map((entry) => (
+                <div>
+                    <p class="font-bold">{entry.period}</p>
+                    <p>
+                        {entry.role} at
+                        <a href={entry.companyUrl} class="tab-link text-primary border-b border-dotted">
+                            {entry.company}
+                        </a>
+                    </p>
+                </div>
+            ))}
+        </div>
+    </div>
+</div> 
