@@ -6,11 +6,36 @@ import crtImage from "../assets/crt.png";
 import profileImage from "../assets/profile.png";
 import CrtEffect from "../components/CrtEffect.astro";
 import ambientAudio from "../assets/ambient.mp3";
+
 const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
+
+// Project data with mock images
+const projects = [
+	{
+		id: "voice-ai",
+		title: "Voice AI Platform",
+		description: "AI-powered voice synthesis and analysis platform",
+		image: "https://picsum.photos/800/800?random=1"
+	},
+	{
+		id: "portfolio",
+		title: "Portfolio Website",
+		description: "Personal portfolio with CRT effect",
+		image: "https://picsum.photos/800/800?random=2"
+	},
+	{
+		id: "ecommerce",
+		title: "E-commerce Solution",
+		description: "Full-stack e-commerce platform",
+		image: "https://picsum.photos/800/800?random=3"
+	}
+];
 ---
 
 <Layout>
 	<div class="md:h-screen flex md:overflow-hidden">
+		<!-- Add hidden element to store projects data -->
+		<div id="projects-data" data-projects={JSON.stringify(projects)} data-profile-image={profileImage.src} class="hidden"></div>
 		<div class="lines flex-1"></div>
 		<div class="flex w-full max-w-[1400px]">
 			<div class="flex-1 w-full md:max-w-[500px]">
@@ -163,26 +188,16 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 											experiments. Here I'll showcase my
 											best work.
 										</p>
-										<ul class="list-disc pl-5 space-y-2">
-											<li>
-												<a
-													href="#"
-													class="tab-link text-primary border-b border-dotted"
-													>Voice AI Platform</a>
-											</li>
-											<li>
-												<a
-													href="#"
-													class="tab-link text-primary border-b border-dotted"
-													>Portfolio Website</a>
-											</li>
-											<li>
-												<a
-													href="#"
-													class="tab-link text-primary border-b border-dotted"
-													>E-commerce Solution</a>
-											</li>
-										</ul>
+										<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+											{projects.map((project: { id: string; title: string; description: string; image: string }) => (
+												<button
+													class="project-item p-4 border border-white/10 hover:border-white/20 transition-colors text-left"
+													data-project-id={project.id}>
+													<h3 class="text-lg font-bold mb-2">{project.title}</h3>
+													<p class="text-sm opacity-80">{project.description}</p>
+												</button>
+											))}
+										</div>
 									</div>
 								</div>
 
@@ -382,7 +397,20 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 </Layout>
 
 <script>
+	// Define project type
+	interface Project {
+		id: string;
+		title: string;
+		description: string;
+		image: string;
+	}
+
 	document.addEventListener("DOMContentLoaded", () => {
+		// Get projects data and profile image from data attributes
+		const projectsData = document.getElementById('projects-data')?.getAttribute('data-projects');
+		const profileImageUrl = document.getElementById('projects-data')?.getAttribute('data-profile-image');
+		const projects: Project[] = projectsData ? JSON.parse(projectsData) : [];
+
 		// Sound elements
 		const clickSound = document.getElementById("click-sound") as HTMLAudioElement;
 		const switchSound = document.getElementById("switch-sound") as HTMLAudioElement;
@@ -408,6 +436,7 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 			console.log('Toggle audio clicked');
 			
 			if (!isPlaying) {
+				// Play all sounds
 				if (bgAudio) {
 					const playPromise = bgAudio.play();
 					if (playPromise !== undefined) {
@@ -422,6 +451,7 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 					}
 				}
 			} else {
+				// Mute all sounds
 				if (bgAudio) {
 					bgAudio.pause();
 					isPlaying = false;
@@ -429,6 +459,22 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 					audioIndicator?.classList.remove('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]');
 					audioIndicator?.classList.add('shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]');
 				}
+			}
+		};
+
+		// Function to play click sound
+		const playClickSound = () => {
+			if (clickSound && isPlaying) {
+				clickSound.currentTime = 0;
+				clickSound.play().catch((e) => console.log("Error playing sound:", e));
+			}
+		};
+
+		// Function to play switch sound
+		const playSwitchSound = () => {
+			if (switchSound && isPlaying) {
+				switchSound.currentTime = 0;
+				switchSound.play().catch((e) => console.log("Error playing sound:", e));
 			}
 		};
 
@@ -442,22 +488,6 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 			}
 		}
 
-		// Function to play click sound
-		const playClickSound = () => {
-			if (clickSound) {
-				clickSound.currentTime = 0;
-				clickSound.play().catch((e) => console.log("Error playing sound:", e));
-			}
-		};
-
-		// Function to play switch sound
-		const playSwitchSound = () => {
-			if (switchSound) {
-				switchSound.currentTime = 0;
-				switchSound.play().catch((e) => console.log("Error playing sound:", e));
-			}
-		};
-
 		// Add click event listeners to all tab buttons
 		const tabButtons = document.querySelectorAll(".tab-button");
 		const tabPanels = document.querySelectorAll(".tab-panel");
@@ -466,7 +496,22 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 		// Set the first tab as active by default
 		tabButtons[0].classList.add("opacity-100");
 		tabButtons[0].classList.add("max-md:border-gray-400");
+		tabButtons[0].setAttribute("aria-selected", "true");
 		tabPanels[0].classList.remove("hidden");
+
+		// Initialize CRT display with profile picture
+		const crtContainer = document.querySelector('.crt-container');
+		const mobileCrtContainer = document.querySelector('.crt-container-mobile');
+		
+		if (crtContainer && (crtContainer as any).crtEffect && profileImageUrl) {
+			(crtContainer as any).crtEffect.updateImage(profileImageUrl);
+			(crtContainer as any).crtEffect.updateText("Gledrian Gutierrez", "Software Engineer, ELEVENLABS");
+		}
+		
+		if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect && profileImageUrl) {
+			(mobileCrtContainer as any).crtEffect.updateImage(profileImageUrl);
+			(mobileCrtContainer as any).crtEffect.updateText("Gledrian Gutierrez", "Software Engineer, ELEVENLABS");
+		}
 
 		tabButtons.forEach((button) => {
 			button.addEventListener("click", () => {
@@ -492,6 +537,45 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 				);
 				if (activePanel) {
 					activePanel.classList.remove("hidden");
+					
+					// If projects tab is selected, select first project without sound
+					if (targetTab === "projects") {
+						const firstProject = document.querySelector('.project-item') as HTMLElement;
+						if (firstProject) {
+							// Remove selected class from all projects
+							document.querySelectorAll('.project-item').forEach(project => {
+								project.classList.remove('selected');
+							});
+							
+							// Add selected class to first project
+							firstProject.classList.add('selected');
+							
+							// Update CRT display with first project
+							const project = projects[0];
+							if (project) {
+								if (crtContainer && (crtContainer as any).crtEffect) {
+									(crtContainer as any).crtEffect.updateImage(project.image);
+									(crtContainer as any).crtEffect.updateText(project.title, project.description);
+								}
+								
+								if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
+									(mobileCrtContainer as any).crtEffect.updateImage(project.image);
+									(mobileCrtContainer as any).crtEffect.updateText(project.title, project.description);
+								}
+							}
+						}
+					} else if (targetTab === "info" && profileImageUrl) {
+						// Restore profile picture when going back to info tab
+						if (crtContainer && (crtContainer as any).crtEffect) {
+							(crtContainer as any).crtEffect.updateImage(profileImageUrl);
+							(crtContainer as any).crtEffect.updateText("Gledrian Gutierrez", "Software Engineer, ELEVENLABS");
+						}
+						
+						if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
+							(mobileCrtContainer as any).crtEffect.updateImage(profileImageUrl);
+							(mobileCrtContainer as any).crtEffect.updateText("Gledrian Gutierrez", "Software Engineer, ELEVENLABS");
+						}
+					}
 				}
 			});
 		});
@@ -500,6 +584,41 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 			link.addEventListener("click", (e) => {
 				e.preventDefault();
 				playSwitchSound();
+			});
+		});
+
+		// Project click handler
+		const projectItems = document.querySelectorAll('.project-item');
+		
+		projectItems.forEach(item => {
+			item.addEventListener('click', () => {
+				// Remove selected class from all projects
+				projectItems.forEach(project => {
+					project.classList.remove('selected');
+				});
+				
+				// Add selected class to clicked project
+				item.classList.add('selected');
+				
+				const projectId = item.getAttribute('data-project-id');
+				const project = projects.find((p: Project) => p.id === projectId);
+				
+				if (project) {
+					// Update desktop CRT
+					if (crtContainer && (crtContainer as any).crtEffect) {
+						(crtContainer as any).crtEffect.updateImage(project.image);
+						(crtContainer as any).crtEffect.updateText(project.title, project.description);
+					}
+					
+					// Update mobile CRT
+					if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
+						(mobileCrtContainer as any).crtEffect.updateImage(project.image);
+						(mobileCrtContainer as any).crtEffect.updateText(project.title, project.description);
+					}
+					
+					// Play switch sound
+					playSwitchSound();
+				}
 			});
 		});
 	});
@@ -538,5 +657,22 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 
 	.tab-link:hover {
 		opacity: 0.8;
+	}
+
+	.project-item {
+		background: rgba(0, 0, 0, 0.2);
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+	
+	.project-item:hover {
+		background: rgba(0, 0, 0, 0.3);
+	}
+
+	.project-item.selected {
+		background: rgba(255, 255, 255, 0.1);
+		border-color: rgba(255, 255, 255, 0.3);
+		box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 	}
 </style>

@@ -372,6 +372,10 @@ const {
 						// Sample texture with distortion
 						vec4 texel = texture2D(tDiffuse, distortedUv);
 						
+						// Convert to black and white using luminance
+						float luminance = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+						texel.rgb = vec3(luminance);
+						
 						// Create rolling scanlines
 						float scanline = 0.5 + 0.5 * sin((uv.y + mod(time * 0.5, 1.0)) * sCount);
 						scanline = 1.0 - (scanline * sIntensity);
@@ -384,7 +388,7 @@ const {
 						float vig = 1.0 - vIntensity * max(vignetteUv.x, vignetteUv.y);
 						vig = pow(vig, 2.0);
 						
-						// Add chromatic aberration
+						// Add chromatic aberration (only to the grayscale image)
 						float aberration = 0.003;
 						vec2 uvR = distortedUv + vec2(aberration, 0.0);
 						vec2 uvB = distortedUv - vec2(aberration, 0.0);
@@ -392,6 +396,10 @@ const {
 						color.r = texture2D(tDiffuse, uvR).r;
 						color.g = texel.g;
 						color.b = texture2D(tDiffuse, uvB).b;
+						
+						// Convert the chromatic aberration result to grayscale as well
+						float aberrationLuminance = dot(color, vec3(0.299, 0.587, 0.114));
+						color = vec3(aberrationLuminance);
 						
 						// Composite the effects
 						vec3 result = color;
@@ -463,13 +471,42 @@ const {
 			this.height = Math.max(this.container.clientHeight, 1);
 			this.renderer.setSize(this.width, this.height);
 		}
+
+		// Add new method to update image
+		updateImage(imageUrl: string) {
+			const loader = new THREE.TextureLoader();
+			loader.load(imageUrl, (texture) => {
+				texture.wrapS = THREE.ClampToEdgeWrapping;
+				texture.wrapT = THREE.ClampToEdgeWrapping;
+				texture.minFilter = THREE.LinearFilter;
+				texture.magFilter = THREE.LinearFilter;
+				this.material.uniforms.tDiffuse = { value: texture };
+			});
+		}
+
+		// Add new method to update text
+		updateText(text: string, subText: string | null) {
+			this.originalText = text.toUpperCase();
+			this.originalSubText = subText ? subText.toUpperCase() : '';
+			this.currentText = Array(text.length).fill('_').join('');
+			this.currentSubText = subText ? Array(subText.length).fill('_').join('') : '';
+			this.charsToReveal = new Set();
+			this.subCharsToReveal = new Set();
+			this.animationStartTime = performance.now();
+			
+			if (this.textCanvas) {
+				this.updateTextTexture();
+			}
+		}
 	}
 
 	document.addEventListener("DOMContentLoaded", () => {
 		const containers = document.querySelectorAll(".crt-container, .crt-container-mobile");
 		containers.forEach((container) => {
 			if (!(container instanceof HTMLElement)) return;
-			new CRTEffect(container);
+			const crtEffect = new CRTEffect(container);
+			// Store the instance on the container for external access
+			(container as any).crtEffect = crtEffect;
 		});
 	});
 </script>
