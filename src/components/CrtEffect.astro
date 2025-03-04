@@ -40,6 +40,18 @@ const {
 		camera: THREE.OrthographicCamera = new THREE.OrthographicCamera();
 		renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer();
 		material: THREE.ShaderMaterial = new THREE.ShaderMaterial();
+		originalText: string = '';
+		originalSubText: string = '';
+		currentText: string = '';
+		currentSubText: string = '';
+		lastUpdateTime: number = 0;
+		updateInterval: number = 20;
+		charsToReveal: Set<number> = new Set();
+		subCharsToReveal: Set<number> = new Set();
+		textCanvas: HTMLCanvasElement | null = null;
+		subText: string | null = null;
+		animationStartTime: number = 0;
+		animationDuration: number = 1500;
 
 		constructor(container: HTMLElement) {
 			this.container = container;
@@ -128,11 +140,22 @@ const {
 				);
 				ctx.stroke();
 
+				// Store original text for animation
+				this.originalText = text.toUpperCase();
+				this.originalSubText = subText ? subText.toUpperCase() : '';
+				this.currentText = Array(text.length).fill('_').join('');
+				this.currentSubText = subText ? Array(subText.length).fill('_').join('') : '';
+				this.lastUpdateTime = 0;
+				this.updateInterval = 20;
+				this.charsToReveal = new Set();
+				this.subCharsToReveal = new Set();
+				this.animationStartTime = performance.now();
+				
 				// Draw main text with VT323 font
 				ctx.fillStyle = "white";
 				ctx.font = "28px VT323";
 				ctx.fillText(
-					text.toUpperCase(),
+					this.currentText,
 					leftPadding + 20,
 					canvas.height - bottomPadding - 45
 				);
@@ -153,16 +176,127 @@ const {
 				if (subText) {
 					ctx.font = "20px VT323";
 					ctx.fillText(
-						subText.toUpperCase(),
+						this.currentSubText,
 						leftPadding + 20,
 						canvas.height - bottomPadding - 20
 					);
 				}
+
+				// Store canvas for updates
+				this.textCanvas = canvas;
+				this.subText = subText;
 			}
 
 			const texture = new THREE.CanvasTexture(canvas);
 			texture.needsUpdate = true;
 			return texture;
+		}
+
+		updateTextTexture() {
+			if (!this.textCanvas) return;
+			
+			const now = performance.now();
+			if (now - this.lastUpdateTime < this.updateInterval) return;
+			this.lastUpdateTime = now;
+
+			const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+			let textArray = this.currentText.split('');
+			let subTextArray = this.currentSubText.split('');
+			
+			// Calculate progress based on time
+			const progress = Math.min((now - this.animationStartTime) / this.animationDuration, 1);
+			const targetRevealed = Math.floor(progress * this.originalText.length);
+			const targetSubRevealed = Math.floor(progress * this.originalSubText.length);
+
+			// Reveal characters based on progress
+			while (this.charsToReveal.size < targetRevealed) {
+				let availableIndices = Array.from(Array(this.originalText.length).keys())
+					.filter(i => !this.charsToReveal.has(i));
+				if (availableIndices.length > 0) {
+					let randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+					this.charsToReveal.add(randomIndex);
+				}
+			}
+
+			while (this.subCharsToReveal.size < targetSubRevealed) {
+				let availableIndices = Array.from(Array(this.originalSubText.length).keys())
+					.filter(i => !this.subCharsToReveal.has(i));
+				if (availableIndices.length > 0) {
+					let randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+					this.subCharsToReveal.add(randomIndex);
+				}
+			}
+
+			// Update main text
+			for (let i = 0; i < textArray.length; i++) {
+				if (this.charsToReveal.has(i)) {
+					textArray[i] = this.originalText[i];
+				} else if (Math.random() < 0.5) {
+					textArray[i] = chars[Math.floor(Math.random() * chars.length)];
+				}
+			}
+
+			// Update subtext
+			for (let i = 0; i < subTextArray.length; i++) {
+				if (this.subCharsToReveal.has(i)) {
+					subTextArray[i] = this.originalSubText[i];
+				} else if (Math.random() < 0.5) {
+					subTextArray[i] = chars[Math.floor(Math.random() * chars.length)];
+				}
+			}
+
+			this.currentText = textArray.join('');
+			this.currentSubText = subTextArray.join('');
+
+			// Update canvas
+			const ctx = this.textCanvas.getContext('2d');
+			if (!ctx) return;
+
+			ctx.clearRect(0, 0, this.textCanvas.width, this.textCanvas.height);
+			
+			// Redraw box and text
+			const bottomPadding = 40;
+			const leftPadding = 40;
+			const boxWidth = this.textCanvas.width - leftPadding * 2;
+
+			ctx.strokeStyle = "white";
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.rect(
+				leftPadding,
+				this.textCanvas.height - bottomPadding - 80,
+				boxWidth,
+				70
+			);
+			ctx.stroke();
+
+			ctx.fillStyle = "white";
+			ctx.font = "28px VT323";
+			ctx.fillText(
+				this.currentText,
+				leftPadding + 20,
+				this.textCanvas.height - bottomPadding - 45
+			);
+
+			// Draw line and subtext
+			ctx.beginPath();
+			ctx.moveTo(leftPadding + 10, this.textCanvas.height - bottomPadding - 40);
+			ctx.lineTo(leftPadding + boxWidth - 10, this.textCanvas.height - bottomPadding - 40);
+			ctx.stroke();
+
+			if (this.subText) {
+				ctx.font = "20px VT323";
+				ctx.fillText(
+					this.currentSubText,
+					leftPadding + 20,
+					this.textCanvas.height - bottomPadding - 20
+				);
+			}
+
+			// Update texture
+			if (this.material.uniforms.tText) {
+				this.material.uniforms.tText.value.needsUpdate = true;
+			}
 		}
 
 		setupScene() {
@@ -195,7 +329,8 @@ const {
 					brightness: { value: 1.1 },
 					scanSpeed: { value: 0.25 },
 					scanWidth: { value: 0.03 },
-					pixelShift: { value: 0.025 }
+					pixelShift: { value: 0.025 },
+					decryptProgress: { value: 0.0 }
 				},
 				vertexShader: `
 					varying vec2 vUv;
@@ -261,14 +396,12 @@ const {
 						// Composite the effects
 						vec3 result = color;
 						result *= scanline * vig * brightness;
-						
-						// Apply noise uniformly
 						result += vec3(noise);
 						
-						// Get text with proper positioning - now using distorted UVs
+						// Get text with proper positioning
 						vec4 textColor = texture2D(tText, distortedUv);
 						
-						// Overlay text if present
+						// Simple text overlay without any effects
 						result = mix(result, textColor.rgb, textColor.a * 0.9);
 						
 						gl_FragColor = vec4(result, 1.0);
@@ -286,6 +419,12 @@ const {
 			requestAnimationFrame(this.animate.bind(this));
 			const time = performance.now() / 1000;
 			this.material.uniforms.time.value = time;
+			
+			// Update text animation
+			if (this.textCanvas) {
+				this.updateTextTexture();
+			}
+			
 			this.renderer.render(this.scene, this.camera);
 		}
 

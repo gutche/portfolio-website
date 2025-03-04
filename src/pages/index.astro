@@ -300,7 +300,7 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 										class="h-full w-full flex items-center justify-center rounded-full bg-neutral-900 blur-[2px] shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),_0_5px_4px_rgba(0,0,0,0.75)]">
 									</div><span
 										class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-base uppercase pt-1 whitespace-nowrap"
-										>Send message</span
+										>Send a message</span
 									></button
 								>
 							</div>
@@ -382,20 +382,83 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 </Layout>
 
 <script>
-	// Client-side JavaScript to handle tab functionality and sound effects
 	document.addEventListener("DOMContentLoaded", () => {
 		// Sound elements
-		const clickSound = document.getElementById(
-			"click-sound"
-		) as HTMLAudioElement;
-		const switchSound = document.getElementById(
-			"switch-sound"
-		) as HTMLAudioElement;
+		const clickSound = document.getElementById("click-sound") as HTMLAudioElement;
+		const switchSound = document.getElementById("switch-sound") as HTMLAudioElement;
+		const bgAudio = document.getElementById('bgAudio') as HTMLAudioElement;
+		const audioButton = document.getElementById('audioButton');
+		const audioIndicator = document.getElementById('audioIndicator');
 
 		// Set volume for sound effects
 		if (clickSound) clickSound.volume = 0.5;
 		if (switchSound) switchSound.volume = 0.5;
+		if (bgAudio) bgAudio.volume = 0.5;
 
+		let isPlaying = false;
+
+		// Initialize the indicator to red (muted state)
+		audioIndicator?.classList.remove('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]');
+		audioIndicator?.classList.add('shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]');
+
+		// Audio toggle functionality
+		const toggleAudio = (e: Event) => {
+			e.preventDefault();
+			e.stopPropagation();
+			console.log('Toggle audio clicked');
+			
+			if (!isPlaying) {
+				if (bgAudio) {
+					const playPromise = bgAudio.play();
+					if (playPromise !== undefined) {
+						playPromise.then(() => {
+							isPlaying = true;
+							console.log('Audio started playing');
+							audioIndicator?.classList.remove('shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]');
+							audioIndicator?.classList.add('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]');
+						}).catch(error => {
+							console.error('Error playing audio:', error);
+						});
+					}
+				}
+			} else {
+				if (bgAudio) {
+					bgAudio.pause();
+					isPlaying = false;
+					console.log('Audio paused');
+					audioIndicator?.classList.remove('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]');
+					audioIndicator?.classList.add('shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]');
+				}
+			}
+		};
+
+		// Add click listener to audio button and its children
+		if (audioButton) {
+			audioButton.addEventListener('click', toggleAudio);
+			// Also add to the span inside the button in case event bubbling is blocked
+			const audioButtonSpan = audioButton.querySelector('span');
+			if (audioButtonSpan) {
+				audioButtonSpan.addEventListener('click', toggleAudio);
+			}
+		}
+
+		// Function to play click sound
+		const playClickSound = () => {
+			if (clickSound) {
+				clickSound.currentTime = 0;
+				clickSound.play().catch((e) => console.log("Error playing sound:", e));
+			}
+		};
+
+		// Function to play switch sound
+		const playSwitchSound = () => {
+			if (switchSound) {
+				switchSound.currentTime = 0;
+				switchSound.play().catch((e) => console.log("Error playing sound:", e));
+			}
+		};
+
+		// Add click event listeners to all tab buttons
 		const tabButtons = document.querySelectorAll(".tab-button");
 		const tabPanels = document.querySelectorAll(".tab-panel");
 		const tabLinks = document.querySelectorAll(".tab-link");
@@ -405,52 +468,25 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 		tabButtons[0].classList.add("max-md:border-gray-400");
 		tabPanels[0].classList.remove("hidden");
 
-		// Function to play click sound
-		const playClickSound = () => {
-			if (clickSound) {
-				clickSound.currentTime = 0; // Reset sound to start
-				clickSound
-					.play()
-					.catch((e) => console.log("Error playing sound:", e));
-			}
-		};
-
-		// Function to play switch sound
-		const playSwitchSound = () => {
-			if (switchSound) {
-				switchSound.currentTime = 0; // Reset sound to start
-				switchSound
-					.play()
-					.catch((e) => console.log("Error playing sound:", e));
-			}
-		};
-
-		// Add click event listeners to all tab buttons
 		tabButtons.forEach((button) => {
 			button.addEventListener("click", () => {
-				// Play click sound when tab is clicked
 				playClickSound();
-
 				const targetTab = button.getAttribute("data-tab");
 
-				// Remove active state from all buttons
 				tabButtons.forEach((btn) => {
 					btn.classList.remove("opacity-100");
 					btn.classList.remove("max-md:border-gray-400");
 					btn.setAttribute("aria-selected", "false");
 				});
 
-				// Add active state to clicked button
 				button.classList.add("opacity-100");
 				button.classList.add("max-md:border-gray-400");
 				button.setAttribute("aria-selected", "true");
 
-				// Hide all tab panels
 				tabPanels.forEach((panel) => {
 					panel.classList.add("hidden");
 				});
 
-				// Show the target tab panel
 				const activePanel = document.querySelector(
 					`.tab-panel[data-tab="${targetTab}"]`
 				);
@@ -460,53 +496,12 @@ const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
 			});
 		});
 
-		// Add click event listeners to all links inside tabs
 		tabLinks.forEach((link) => {
 			link.addEventListener("click", (e) => {
-				// Prevent default behavior to demo sound
 				e.preventDefault();
-
-				// Play switch sound when link is clicked
 				playSwitchSound();
 			});
 		});
-
-		// Audio background functionality
-		let isPlaying = true; // Changed to true by default
-		const bgAudio = document.getElementById('bgAudio') as HTMLAudioElement;
-		const audioButton = document.getElementById('audioButton');
-		const audioIndicator = document.getElementById('audioIndicator');
-
-		// Start playing by default
-		bgAudio?.play()
-			.catch(error => {
-				console.error('Error playing audio:', error);
-				// If autoplay fails, reset to off state
-				isPlaying = false;
-				audioIndicator?.classList.remove('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]');
-				audioIndicator?.classList.add('shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]');
-			});
-
-		const toggleAudio = () => {
-			if (!isPlaying) {
-				bgAudio?.play()
-					.then(() => {
-						isPlaying = true;
-						audioIndicator?.classList.remove('shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]');
-						audioIndicator?.classList.add('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]');
-					})
-					.catch(error => {
-						console.error('Error playing audio:', error);
-					});
-			} else {
-				bgAudio?.pause();
-				isPlaying = false;
-				audioIndicator?.classList.remove('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]');
-				audioIndicator?.classList.add('shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]');
-			}
-		};
-
-		audioButton?.addEventListener('click', toggleAudio);
 	});
 </script>
 
