@@ -19,54 +19,8 @@ import ContactTab from "../components/tabs/ContactTab.astro";
 import { skills } from "../data/skills";
 import { projects } from "../data/projects";
 
-const tabs = ["info", "skills", "projects", "timeline", "socials", "contact"];
+const tabs = ["info", "skills", "projects", "timeline", "socials"];
 
-// Skills data with icons and descriptions
-const skillsData = [
-	{
-		id: "frontend",
-		title: "Frontend Development",
-		description: "Expertise in modern frontend frameworks and responsive design",
-		technologies: "React, Vue, Angular",
-		icon: "https://cdn-icons-png.flaticon.com/512/1183/1183672.png"
-	},
-	{
-		id: "backend",
-		title: "Backend Development",
-		description: "Building scalable server-side applications and APIs",
-		technologies: "Node.js, Python",
-		icon: "https://cdn-icons-png.flaticon.com/512/5968/5968322.png"
-	},
-	{
-		id: "cloud",
-		title: "Cloud Infrastructure",
-		description: "Designing and managing cloud-based solutions",
-		technologies: "AWS, GCP",
-		icon: "https://cdn-icons-png.flaticon.com/512/4727/4727496.png"
-	}
-];
-
-// Project data with mock images
-const projectsData = [
-	{
-		id: "voice-ai",
-		title: "Voice AI Platform",
-		description: "AI-powered voice synthesis and analysis platform",
-		image: "https://picsum.photos/800/800?random=1"
-	},
-	{
-		id: "portfolio",
-		title: "Portfolio Website",
-		description: "Personal portfolio with CRT effect",
-		image: "https://picsum.photos/800/800?random=2"
-	},
-	{
-		id: "ecommerce",
-		title: "E-commerce Solution",
-		description: "Full-stack e-commerce platform",
-		image: "https://picsum.photos/800/800?random=3"
-	}
-];
 ---
 
 <Layout>
@@ -183,14 +137,18 @@ const projectsData = [
 							<div class="flex-1">
 								<div
 									class="absolute inset-0 bg-black z-0 blur-[1px] shadow-[0_1px_1px_rgba(255,255,255,0.3)] rounded-[6px]">
-								</div><button
-									class="z-10 relative p-2 bg-neutral-900 w-full h-14 shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45),_inset_0_1px_2px_rgba(255,255,255,0.3)] rounded-[4px] focus active:shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45)] active:scale-[0.99] transition-all duration-200"
+								</div>
+								<a
+									href="https://mail.google.com/mail/?view=cm&fs=1&to=gledrian.dev@gmail.com&su=Hey%20Gledrian!"
+									target="_blank"
+									rel="noopener noreferrer"
+									class="z-10 relative p-2 bg-neutral-900 w-full h-14 shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45),_inset_0_1px_2px_rgba(255,255,255,0.3)] rounded-[4px] focus active:shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45)] active:scale-[0.99] transition-all duration-200 block hover:bg-neutral-800"
 									><div
 										class="h-full w-full flex items-center justify-center rounded-full bg-neutral-900 blur-[2px] shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),_0_5px_4px_rgba(0,0,0,0.75)]">
 									</div><span
 										class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-base uppercase pt-1 whitespace-nowrap"
 										>Send a message</span
-									></button
+									></a
 								>
 							</div>
 							<div class="w-14">
