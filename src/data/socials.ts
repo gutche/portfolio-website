@@ -1,19 +1,15 @@
 export interface Social {
-    name: string;
-    url: string;
+	name: string;
+	url: string;
 }
 
 export const socials: Social[] = [
-    {
-        name: "LinkedIn",
-        url: "#"
-    },
-    {
-        name: "GitHub",
-        url: "#"
-    },
-    {
-        name: "Twitter",
-        url: "#"
-    }
-]; 
+	{
+		name: "GitHub",
+		url: "https://github.com/gledrian",
+	},
+	{
+		name: "LinkedIn",
+		url: "https://linkedin.com/in/gledrian",
+	},
+];

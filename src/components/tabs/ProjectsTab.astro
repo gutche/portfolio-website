@@ -1,42 +1,102 @@
 ---
-import { type Project, projects } from '../../data/projects';
+import { projects } from "../../data/projects";
 
 interface Props {
-    class?: string;
+	class?: string;
 }
 
 const { class: className } = Astro.props;
 ---
 
-<div class:list={["tab-panel", className]} data-tab="projects">
-    <div class="flex flex-col gap-4">
-        <p class="text-base">
-            My projects include websites, applications, and various tech
-            experiments. Here I'll showcase my best work.
-        </p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {projects.map((project) => (
-                <button
-                    class="project-item p-4 border border-white/10 hover:border-white/20 transition-colors text-left bg-black/20 hover:bg-black/30"
-                    data-project-id={project.id}>
-                    <h3 class="text-lg font-bold mb-2">{project.title}</h3>
-                    <p class="text-sm opacity-80">{project.description}</p>
-                </button>
-            ))}
-        </div>
-    </div>
+<div class={`tab-panel ${className}`} data-tab="projects">
+	<div class="flex flex-col gap-2">
+		<p class="text-base">
+			My projects include websites, applications, and various tech
+			experiments. Here I'll showcase my best work.
+		</p>
+		{projects.map((project) => (
+			<button
+				class="project-item p-3 text-left hover:bg-neutral-800/50 transition-colors duration-200"
+				data-project-id={project.id}
+				data-title={project.title}
+				data-description={project.description}
+				data-image={project.image}
+			>
+				<span class="font-medium">{project.title}</span>
+			</button>
+		))}
+	</div>
 </div>
 
-<style>
-.project-item {
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
+<script>
+	// Get all project items
+	const projectItems = document.querySelectorAll('.project-item');
 
-.project-item.selected {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-}
-</style> 
+	// Add selected class to first project by default
+	const firstProject = document.querySelector('.project-item');
+	if (firstProject) {
+		firstProject.classList.add('selected');
+	}
+
+	// Function to play switch sound
+	const playSwitchSound = () => {
+		const switchSound = document.getElementById("switch-sound") as HTMLAudioElement;
+		const audioIndicator = document.getElementById('audioIndicator');
+		if (switchSound && audioIndicator?.classList.contains('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]')) {
+			switchSound.currentTime = 0;
+			switchSound.play().catch((e) => console.log("Error playing sound:", e));
+		}
+	};
+
+	projectItems.forEach(item => {
+		item.addEventListener('click', () => {
+			// Remove selected class from all projects
+			projectItems.forEach(project => {
+				project.classList.remove('selected');
+			});
+			
+			// Add selected class to clicked project
+			item.classList.add('selected');
+			
+			const title = item.getAttribute('data-title');
+			const description = item.getAttribute('data-description');
+			const image = item.getAttribute('data-image');
+			
+			// Update desktop CRT
+			const crtContainer = document.querySelector('.crt-container');
+			if (crtContainer && (crtContainer as any).crtEffect) {
+				(crtContainer as any).crtEffect.updateImage(image);
+				(crtContainer as any).crtEffect.updateText(title, description);
+			}
+			
+			// Update mobile CRT
+			const mobileCrtContainer = document.querySelector('.crt-container-mobile');
+			if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
+				(mobileCrtContainer as any).crtEffect.updateImage(image);
+				(mobileCrtContainer as any).crtEffect.updateText(title, description);
+			}
+			
+			// Play switch sound
+			playSwitchSound();
+		});
+	});
+</script>
+
+<style>
+	.project-item {
+		background: rgba(0, 0, 0, 0.2);
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+	
+	.project-item:hover {
+		background: rgba(0, 0, 0, 0.3);
+	}
+
+	.project-item.selected {
+		background: rgba(255, 255, 255, 0.1);
+		border-color: rgba(255, 255, 255, 0.3);
+		box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+	}
+</style>

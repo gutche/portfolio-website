@@ -5,9 +5,6 @@ import { Image } from "astro:assets";
 import crtImage from "../assets/crt.png";
 import profileImage from "../assets/profile.png";
 import CrtEffect from "../components/CrtEffect.astro";
-import ambientAudio from "../assets/ambient.mp3";
-
-// Import tab components
 import InfoTab from "../components/tabs/InfoTab.astro";
 import SkillsTab from "../components/tabs/SkillsTab.astro";
 import ProjectsTab from "../components/tabs/ProjectsTab.astro";
@@ -20,26 +17,29 @@ import { skills } from "../data/skills";
 import { projects } from "../data/projects";
 
 const tabs = ["info", "skills", "projects", "timeline", "socials"];
-
 ---
 
 <Layout>
 	<!-- Audio Overlay -->
-	<div id="audioOverlay" class="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
-		<div class="bg-neutral-900 p-8 rounded-lg max-w-md w-full mx-4 border border-neutral-800 shadow-2xl">
+	<div
+		id="audioOverlay"
+		class="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
+		<div
+			class="bg-neutral-900 p-8 rounded-lg max-w-md w-full mx-4 border border-neutral-800 shadow-2xl">
 			<h2 class="text-2xl mb-6 text-center">Audio Experience</h2>
-			<p class="text-neutral-400 mb-8 text-center">This site features an immersive audio experience with retro sound effects. Would you like to enable audio? (Recommended)</p>
+			<p class="text-neutral-400 mb-8 text-center">
+				This site features an immersive audio experience with retro
+				sound effects. Would you like to enable audio? (Recommended)
+			</p>
 			<div class="flex gap-4 justify-center">
 				<button
 					id="enableAudio"
-					class="px-6 py-3 bg-neutral-800 hover:bg-neutral-700 rounded-md transition-colors duration-200 flex items-center gap-2"
-				>
+					class="px-6 py-3 bg-neutral-800 hover:bg-neutral-700 rounded-md transition-colors duration-200 flex items-center gap-2">
 					Enable Audio
 				</button>
 				<button
 					id="skipAudio"
-					class="px-6 py-3 bg-transparent hover:bg-neutral-800 rounded-md transition-colors duration-200 border border-neutral-700"
-				>
+					class="px-6 py-3 bg-transparent hover:bg-neutral-800 rounded-md transition-colors duration-200 border border-neutral-700">
 					Continue Without Audio
 				</button>
 			</div>
@@ -47,9 +47,18 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 	</div>
 	<div class="md:h-screen flex md:overflow-hidden">
 		<!-- Add hidden element to store projects data -->
-		<div id="projects-data" data-projects={JSON.stringify(projects)} data-profile-image={profileImage.src} class="hidden"></div>
+		<div
+			id="projects-data"
+			data-projects={JSON.stringify(projects)}
+			data-profile-image={profileImage.src}
+			class="hidden">
+		</div>
 		<!-- Add hidden element to store skills data -->
-		<div id="skills-data" data-skills={JSON.stringify(skills)} class="hidden"></div>
+		<div
+			id="skills-data"
+			data-skills={JSON.stringify(skills)}
+			class="hidden">
+		</div>
 		<div class="lines flex-1"></div>
 		<div class="flex w-full max-w-[1400px]">
 			<div class="flex-1 w-full md:max-w-[500px]">
@@ -245,49 +254,40 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 
 	<!-- Audio elements for sound effects -->
 	<audio id="click-sound" src="/src/assets/click.wav" preload="auto"></audio>
-	<audio id="switch-sound" src="/src/assets/switch.wav" preload="auto"></audio>
-	<audio id="bgAudio" src={ambientAudio} loop preload="auto"></audio>
+	<audio id="switch-sound" src="/src/assets/switch.wav" preload="auto"
+	></audio>
+	<audio id="bgAudio" src="/src/assets/ambient.mp3" loop preload="auto"
+	></audio>
 </Layout>
 
 <script>
-	// Define project type
-	interface Project {
-		id: string;
-		title: string;
-		description: string;
-		image: string;
-	}
-
-	// Define skill type
-	interface Skill {
-		id: string;
-		title: string;
-		description: string;
-		technologies: string;
-		icon: string;
-	}
+	import {
+		handleTabSwitch,
+		playAudio,
+		updateCrtDisplay,
+	} from "../utils/helpers";
 
 	document.addEventListener("DOMContentLoaded", () => {
 		// Audio overlay elements
-		const audioOverlay = document.getElementById('audioOverlay');
-		const enableAudioBtn = document.getElementById('enableAudio');
-		const skipAudioBtn = document.getElementById('skipAudio');
+		const audioOverlay = document.getElementById("audioOverlay");
+		const enableAudioBtn = document.getElementById("enableAudio");
+		const skipAudioBtn = document.getElementById("skipAudio");
 
-		// Get projects data and profile image from data attributes
-		const projectsData = document.getElementById('projects-data')?.getAttribute('data-projects');
-		const profileImageUrl = document.getElementById('projects-data')?.getAttribute('data-profile-image');
-		const projects: Project[] = projectsData ? JSON.parse(projectsData) : [];
-
-		// Get skills data from data attributes
-		const skillsData = document.getElementById('skills-data')?.getAttribute('data-skills');
-		const skills: Skill[] = skillsData ? JSON.parse(skillsData) : [];
+		// Get profile image from data attributes
+		const profileImageUrl = document
+			.getElementById("projects-data")
+			?.getAttribute("data-profile-image");
 
 		// Sound elements
-		const clickSound = document.getElementById("click-sound") as HTMLAudioElement;
-		const switchSound = document.getElementById("switch-sound") as HTMLAudioElement;
-		const bgAudio = document.getElementById('bgAudio') as HTMLAudioElement;
-		const audioButton = document.getElementById('audioButton');
-		const audioIndicator = document.getElementById('audioIndicator');
+		const clickSound = document.getElementById(
+			"click-sound"
+		) as HTMLAudioElement;
+		const switchSound = document.getElementById(
+			"switch-sound"
+		) as HTMLAudioElement;
+		const bgAudio = document.getElementById("bgAudio") as HTMLAudioElement;
+		const audioButton = document.getElementById("audioButton");
+		const audioIndicator = document.getElementById("audioIndicator");
 
 		// Set volume for sound effects
 		if (clickSound) clickSound.volume = 0.5;
@@ -297,33 +297,26 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 		let isPlaying = false;
 
 		// Initialize the indicator to red (muted state)
-		audioIndicator?.classList.remove('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]');
-		audioIndicator?.classList.add('shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]');
+		audioIndicator?.classList.remove(
+			"shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]"
+		);
+		audioIndicator?.classList.add(
+			"shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]"
+		);
 
 		// Audio overlay handlers
-		enableAudioBtn?.addEventListener('click', () => {
+		enableAudioBtn?.addEventListener("click", () => {
 			if (audioOverlay) {
-				audioOverlay.style.display = 'none';
+				audioOverlay.style.display = "none";
 			}
 			// Enable audio
-			if (bgAudio) {
-				const playPromise = bgAudio.play();
-				if (playPromise !== undefined) {
-					playPromise.then(() => {
-						isPlaying = true;
-						console.log('Audio started playing');
-						audioIndicator?.classList.remove('shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]');
-						audioIndicator?.classList.add('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]');
-					}).catch(error => {
-						console.error('Error playing audio:', error);
-					});
-				}
-			}
+			playAudio(bgAudio, audioIndicator!, isPlaying);
+			isPlaying = true;
 		});
 
-		skipAudioBtn?.addEventListener('click', () => {
+		skipAudioBtn?.addEventListener("click", () => {
 			if (audioOverlay) {
-				audioOverlay.style.display = 'none';
+				audioOverlay.style.display = "none";
 			}
 			// Keep audio disabled
 			isPlaying = false;
@@ -333,40 +326,18 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 		const toggleAudio = (e: Event) => {
 			e.preventDefault();
 			e.stopPropagation();
-			console.log('Toggle audio clicked');
-			
-			if (!isPlaying) {
-				// Play all sounds
-				if (bgAudio) {
-					const playPromise = bgAudio.play();
-					if (playPromise !== undefined) {
-						playPromise.then(() => {
-							isPlaying = true;
-							console.log('Audio started playing');
-							audioIndicator?.classList.remove('shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]');
-							audioIndicator?.classList.add('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]');
-						}).catch(error => {
-							console.error('Error playing audio:', error);
-						});
-					}
-				}
-			} else {
-				// Mute all sounds
-				if (bgAudio) {
-					bgAudio.pause();
-					isPlaying = false;
-					console.log('Audio paused');
-					audioIndicator?.classList.remove('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]');
-					audioIndicator?.classList.add('shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]');
-				}
-			}
+			console.log("Toggle audio clicked");
+			playAudio(bgAudio, audioIndicator!, isPlaying);
+			isPlaying = !isPlaying;
 		};
 
 		// Function to play click sound
 		const playClickSound = () => {
 			if (clickSound && isPlaying) {
 				clickSound.currentTime = 0;
-				clickSound.play().catch((e) => console.log("Error playing sound:", e));
+				clickSound
+					.play()
+					.catch((e) => console.log("Error playing sound:", e));
 			}
 		};
 
@@ -374,17 +345,19 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 		const playSwitchSound = () => {
 			if (switchSound && isPlaying) {
 				switchSound.currentTime = 0;
-				switchSound.play().catch((e) => console.log("Error playing sound:", e));
+				switchSound
+					.play()
+					.catch((e) => console.log("Error playing sound:", e));
 			}
 		};
 
 		// Add click listener to audio button and its children
 		if (audioButton) {
-			audioButton.addEventListener('click', toggleAudio);
+			audioButton.addEventListener("click", toggleAudio);
 			// Also add to the span inside the button in case event bubbling is blocked
-			const audioButtonSpan = audioButton.querySelector('span');
+			const audioButtonSpan = audioButton.querySelector("span");
 			if (audioButtonSpan) {
-				audioButtonSpan.addEventListener('click', toggleAudio);
+				audioButtonSpan.addEventListener("click", toggleAudio);
 			}
 		}
 
@@ -394,112 +367,28 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 		const tabLinks = document.querySelectorAll(".tab-link");
 
 		// Set the first tab as active by default
-		tabButtons[0].classList.add("opacity-100");
-		tabButtons[0].classList.add("max-md:border-gray-400");
-		tabButtons[0].setAttribute("aria-selected", "true");
-		tabPanels[0].classList.remove("hidden");
+		handleTabSwitch(tabButtons, tabPanels, "info");
 
 		// Initialize CRT display with profile picture
-		const crtContainer = document.querySelector('.crt-container');
-		const mobileCrtContainer = document.querySelector('.crt-container-mobile');
-		
-		if (crtContainer && (crtContainer as any).crtEffect && profileImageUrl) {
-			(crtContainer as any).crtEffect.updateImage(profileImageUrl);
-			(crtContainer as any).crtEffect.updateText("Gledrian Gutierrez", "Software Engineer, ELEVENLABS");
-		}
-		
-		if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect && profileImageUrl) {
-			(mobileCrtContainer as any).crtEffect.updateImage(profileImageUrl);
-			(mobileCrtContainer as any).crtEffect.updateText("Gledrian Gutierrez", "Software Engineer, ELEVENLABS");
-		}
+		updateCrtDisplay(
+			profileImageUrl || "",
+			"Gledrian Gutierrez",
+			"Software Engineer, ELEVENLABS"
+		);
 
 		tabButtons.forEach((button) => {
 			button.addEventListener("click", () => {
 				playClickSound();
 				const targetTab = button.getAttribute("data-tab");
+				handleTabSwitch(tabButtons, tabPanels, targetTab || "");
 
-				tabButtons.forEach((btn) => {
-					btn.classList.remove("opacity-100");
-					btn.classList.remove("max-md:border-gray-400");
-					btn.setAttribute("aria-selected", "false");
-				});
-
-				button.classList.add("opacity-100");
-				button.classList.add("max-md:border-gray-400");
-				button.setAttribute("aria-selected", "true");
-
-				tabPanels.forEach((panel) => {
-					panel.classList.add("hidden");
-				});
-
-				const activePanel = document.querySelector(
-					`.tab-panel[data-tab="${targetTab}"]`
-				);
-				if (activePanel) {
-					activePanel.classList.remove("hidden");
-					
-					if (targetTab === "projects") {
-						const firstProject = document.querySelector('.project-item');
-						if (firstProject) {
-							// Remove selected class from all projects
-							document.querySelectorAll('.project-item').forEach(project => {
-								project.classList.remove('selected');
-							});
-							
-							// Add selected class to first project
-							firstProject.classList.add('selected');
-							
-							// Update CRT display with first project
-							const project = projects[0];
-							if (project) {
-								if (crtContainer && (crtContainer as any).crtEffect) {
-									(crtContainer as any).crtEffect.updateImage(project.image);
-									(crtContainer as any).crtEffect.updateText(project.title, project.description);
-								}
-								
-								if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
-									(mobileCrtContainer as any).crtEffect.updateImage(project.image);
-									(mobileCrtContainer as any).crtEffect.updateText(project.title, project.description);
-								}
-							}
-						}
-					} else if (targetTab === "skills") {
-						const firstSkill = document.querySelector('.skill-item');
-						if (firstSkill) {
-							// Remove selected class from all skills
-							document.querySelectorAll('.skill-item').forEach(skill => {
-								skill.classList.remove('selected');
-							});
-							
-							// Add selected class to first skill
-							firstSkill.classList.add('selected');
-							
-							// Update CRT display with first skill
-							const skill = skills[0];
-							if (skill) {
-								if (crtContainer && (crtContainer as any).crtEffect) {
-									(crtContainer as any).crtEffect.updateImage(skill.icon);
-									(crtContainer as any).crtEffect.updateText(skill.title, skill.description);
-								}
-								
-								if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
-									(mobileCrtContainer as any).crtEffect.updateImage(skill.icon);
-									(mobileCrtContainer as any).crtEffect.updateText(skill.title, skill.description);
-								}
-							}
-						}
-					} else if (targetTab === "info" && profileImageUrl) {
-						// Restore profile picture when going back to info tab
-						if (crtContainer && (crtContainer as any).crtEffect) {
-							(crtContainer as any).crtEffect.updateImage(profileImageUrl);
-							(crtContainer as any).crtEffect.updateText("Gledrian Gutierrez", "Software Engineer, ELEVENLABS");
-						}
-						
-						if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
-							(mobileCrtContainer as any).crtEffect.updateImage(profileImageUrl);
-							(mobileCrtContainer as any).crtEffect.updateText("Gledrian Gutierrez", "Software Engineer, ELEVENLABS");
-						}
-					}
+				if (targetTab === "info" && profileImageUrl) {
+					// Restore profile picture when going back to info tab
+					updateCrtDisplay(
+						profileImageUrl,
+						"Gledrian Gutierrez",
+						"Software Engineer, ELEVENLABS"
+					);
 				}
 			});
 		});
@@ -507,167 +396,6 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 		tabLinks.forEach((link) => {
 			link.addEventListener("click", (e) => {
 				e.preventDefault();
-				playSwitchSound();
-			});
-		});
-
-		// Project click handler
-		const projectItems = document.querySelectorAll('.project-item');
-		
-		// Add selected class to first project by default
-		const firstProject = document.querySelector('.project-item');
-		if (firstProject) {
-			firstProject.classList.add('selected');
-		}
-		
-		projectItems.forEach(item => {
-			item.addEventListener('click', () => {
-				// Remove selected class from all projects
-				projectItems.forEach(project => {
-					project.classList.remove('selected');
-				});
-				
-				// Add selected class to clicked project
-				item.classList.add('selected');
-				
-				const projectId = item.getAttribute('data-project-id');
-				const project = projects.find((p: Project) => p.id === projectId);
-				
-				if (project) {
-					// Update desktop CRT
-					if (crtContainer && (crtContainer as any).crtEffect) {
-						(crtContainer as any).crtEffect.updateImage(project.image);
-						(crtContainer as any).crtEffect.updateText(project.title, project.description);
-					}
-					
-					// Update mobile CRT
-					if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
-						(mobileCrtContainer as any).crtEffect.updateImage(project.image);
-						(mobileCrtContainer as any).crtEffect.updateText(project.title, project.description);
-					}
-					
-					// Play switch sound
-					playSwitchSound();
-				}
-			});
-		});
-
-		// Skill click handler
-		const skillItems = document.querySelectorAll('.skill-item');
-		
-		// Add selected class to first skill by default
-		const firstSkill = document.querySelector('.skill-item');
-		if (firstSkill) {
-			firstSkill.classList.add('selected');
-		}
-		
-		skillItems.forEach(item => {
-			item.addEventListener('click', () => {
-				// Remove selected class from all skills
-				skillItems.forEach(skill => {
-					skill.classList.remove('selected');
-				});
-				
-				// Add selected class to clicked skill
-				item.classList.add('selected');
-				
-				const skillId = item.getAttribute('data-skill-id');
-				const skill = skills.find((s: Skill) => s.id === skillId);
-				
-				if (skill) {
-					// Update desktop CRT
-					if (crtContainer && (crtContainer as any).crtEffect) {
-						(crtContainer as any).crtEffect.updateImage(skill.icon);
-						(crtContainer as any).crtEffect.updateText(skill.title, skill.description);
-					}
-					
-					// Update mobile CRT
-					if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
-						(mobileCrtContainer as any).crtEffect.updateImage(skill.icon);
-						(mobileCrtContainer as any).crtEffect.updateText(skill.title, skill.description);
-					}
-					
-					// Play switch sound
-					playSwitchSound();
-				}
-			});
-		});
-
-		// Timeline click handler
-		const timelineItems = document.querySelectorAll('.timeline-item');
-
-		// Add selected class to first timeline item by default
-		const firstTimelineItem = document.querySelector('.timeline-item');
-		if (firstTimelineItem) {
-			firstTimelineItem.classList.add('selected');
-		}
-
-		timelineItems.forEach(item => {
-			item.addEventListener('click', () => {
-				// Remove selected class from all timeline items
-				timelineItems.forEach(timeline => {
-					timeline.classList.remove('selected');
-				});
-				
-				// Add selected class to clicked timeline item
-				item.classList.add('selected');
-				
-				const period = item.getAttribute('data-period');
-				const role = item.getAttribute('data-role');
-				const company = item.getAttribute('data-company');
-				
-				// Update desktop CRT
-				if (crtContainer && (crtContainer as any).crtEffect) {
-					(crtContainer as any).crtEffect.updateImage("/timeline.png");
-					(crtContainer as any).crtEffect.updateText(`${role} at ${company}`, period);
-				}
-				
-				// Update mobile CRT
-				if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
-					(mobileCrtContainer as any).crtEffect.updateImage("/timeline.png");
-					(mobileCrtContainer as any).crtEffect.updateText(`${role} at ${company}`, period);
-				}
-				
-				// Play switch sound
-				playSwitchSound();
-			});
-		});
-
-		// Social click handler
-		const socialItems = document.querySelectorAll('.social-item');
-
-		// Add selected class to first social item by default
-		const firstSocialItem = document.querySelector('.social-item');
-		if (firstSocialItem) {
-			firstSocialItem.classList.add('selected');
-		}
-
-		socialItems.forEach(item => {
-			item.addEventListener('click', () => {
-				// Remove selected class from all social items
-				socialItems.forEach(social => {
-					social.classList.remove('selected');
-				});
-				
-				// Add selected class to clicked social item
-				item.classList.add('selected');
-				
-				const name = item.getAttribute('data-name');
-				const url = item.getAttribute('data-url');
-				
-				// Update desktop CRT
-				if (crtContainer && (crtContainer as any).crtEffect) {
-					(crtContainer as any).crtEffect.updateImage("/social.png");
-					(crtContainer as any).crtEffect.updateText(name, url || '');
-				}
-				
-				// Update mobile CRT
-				if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
-					(mobileCrtContainer as any).crtEffect.updateImage("/social.png");
-					(mobileCrtContainer as any).crtEffect.updateText(name, url || '');
-				}
-				
-				// Play switch sound
 				playSwitchSound();
 			});
 		});
@@ -707,39 +435,5 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 
 	.tab-link:hover {
 		opacity: 0.8;
-	}
-
-	.project-item {
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 4px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-	
-	.project-item:hover {
-		background: rgba(0, 0, 0, 0.3);
-	}
-
-	.project-item.selected {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.3);
-		box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-	}
-
-	.skill-item {
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 4px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-	
-	.skill-item:hover {
-		background: rgba(0, 0, 0, 0.3);
-	}
-
-	.skill-item.selected {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.3);
-		box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 	}
 </style>
