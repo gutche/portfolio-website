@@ -1,97 +1,26 @@
 ---
-import { socials } from "../../data/socials";
-
-interface Props {
-    class?: string;
-}
-
-const { class: className } = Astro.props;
+import Socials from "./Socials";
 ---
 
-<div class={`tab-panel ${className}`} data-tab="socials">
-    <div class="flex flex-col gap-2">
-        {socials.map((social) => (
-            <button
-                class="social-item p-3 text-left hover:bg-neutral-800/50 transition-colors duration-200"
-                data-name={social.name}
-                data-url={social.url}
-                data-icon={social.icon}
-            >
-                <span class="font-medium">{social.name}</span>
-            </button>
-        ))}
-    </div>
+<div class="tab-panel" data-tab="socials">
+	<Socials />
 </div>
 
-<script>
-    // Get all social items
-    const socialItems = document.querySelectorAll('.social-item');
-
-    // Add selected class to first social item by default
-    const firstSocialItem = document.querySelector('.social-item');
-    if (firstSocialItem) {
-        firstSocialItem.classList.add('selected');
-    }
-
-    // Function to play switch sound
-    const playSwitchSound = () => {
-        const switchSound = document.getElementById("switch-sound") as HTMLAudioElement;
-        const audioIndicator = document.getElementById('audioIndicator');
-        if (switchSound && audioIndicator?.classList.contains('shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]')) {
-            switchSound.currentTime = 0;
-            switchSound.play().catch((e) => console.log("Error playing sound:", e));
-        }
-    };
-
-    socialItems.forEach(item => {
-        item.addEventListener('click', () => {
-            // Remove selected class from all social items
-            socialItems.forEach(social => {
-                social.classList.remove('selected');
-            });
-            
-            // Add selected class to clicked social item
-            item.classList.add('selected');
-            
-            const name = item.getAttribute('data-name');
-            const url = item.getAttribute('data-url');
-            const icon = item.getAttribute('data-icon');
-            
-            // Update desktop CRT
-            const crtContainer = document.querySelector('.crt-container');
-            if (crtContainer && (crtContainer as any).crtEffect) {
-                (crtContainer as any).crtEffect.updateImage(icon);
-                (crtContainer as any).crtEffect.updateText(name, url || '');
-            }
-            
-            // Update mobile CRT
-            const mobileCrtContainer = document.querySelector('.crt-container-mobile');
-            if (mobileCrtContainer && (mobileCrtContainer as any).crtEffect) {
-                (mobileCrtContainer as any).crtEffect.updateImage(icon);
-                (mobileCrtContainer as any).crtEffect.updateText(name, url || '');
-            }
-            
-            // Play switch sound
-            playSwitchSound();
-        });
-    });
-</script>
-
 <style>
-    .social-item {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .social-item:hover {
-        background: rgba(0, 0, 0, 0.3);
-    }
+	.social-item {
+		background: rgba(0, 0, 0, 0.2);
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
 
-    .social-item.selected {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.3);
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-    }
-</style> 
+	.social-item:hover {
+		background: rgba(0, 0, 0, 0.3);
+	}
+
+	.social-item.selected {
+		background: rgba(255, 255, 255, 0.1);
+		border-color: rgba(255, 255, 255, 0.3);
+		box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+	}
+</style>
