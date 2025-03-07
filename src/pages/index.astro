@@ -9,19 +9,16 @@ import InfoTab from "../components/tabs/InfoTab.astro";
 import SkillsTab from "../components/tabs/SkillsTab.astro";
 import ProjectsTab from "../components/tabs/ProjectsTab.astro";
 import TimelineTab from "../components/tabs/TimelineTab.astro";
-import SocialsTab from "../components/tabs/SocialsTab.astro";
 import ContactTab from "../components/tabs/ContactTab.astro";
-
-// Import data
-import { skills } from "../data/skills";
-import { projects } from "../data/projects";
+import Socials from "../components/tabs/Socials";
+import HorizontalLines from "../components/HorizontalLines.astro";
 
 const tabs = ["info", "skills", "projects", "timeline", "socials"];
 ---
 
 <Layout>
 	<!-- Audio Overlay -->
-	<div
+	<!-- <div
 		id="audioOverlay"
 		class="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
 		<div
@@ -44,59 +41,13 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 				</button>
 			</div>
 		</div>
-	</div>
+	</div> -->
 	<div class="md:h-screen flex md:overflow-hidden">
-		<!-- Add hidden element to store projects data -->
-		<div
-			id="projects-data"
-			data-projects={JSON.stringify(projects)}
-			data-profile-image={profileImage.src}
-			class="hidden">
-		</div>
-		<!-- Add hidden element to store skills data -->
-		<div
-			id="skills-data"
-			data-skills={JSON.stringify(skills)}
-			class="hidden">
-		</div>
 		<div class="lines flex-1"></div>
 		<div class="flex w-full max-w-[1400px]">
 			<div class="flex-1 w-full md:max-w-[500px]">
 				<div class="p-3 pb-24 md:p-4 flex flex-col h-full">
-					<!-- Top part -->
-					<div
-						class="flex justify-between items-center gap-1 mb-4 md:mb-12">
-						<div
-							class="flex flex-col flex-1 h-10 gap-px justify-between">
-							<div>
-								<div class="h-px bg-white w-full opacity-10">
-								</div><div class="h-px bg-neutral-950 w-full">
-								</div>
-							</div><div>
-								<div class="h-px bg-white w-full opacity-10">
-								</div><div class="h-px bg-neutral-950 w-full">
-								</div>
-							</div><div>
-								<div class="h-px bg-white w-full opacity-10">
-								</div><div class="h-px bg-neutral-950 w-full">
-								</div>
-							</div><div>
-								<div class="h-px bg-white w-full opacity-10">
-								</div><div class="h-px bg-neutral-950 w-full">
-								</div>
-							</div><div>
-								<div class="h-px bg-white w-full opacity-10">
-								</div><div class="h-px bg-neutral-950 w-full">
-								</div>
-							</div><div>
-								<div class="h-px bg-white w-full opacity-10">
-								</div><div class="h-px bg-neutral-950 w-full">
-								</div>
-							</div>
-						</div>
-					</div>
-					<!-- Top part -->
-
+					<HorizontalLines />
 					<div class="flex flex-col gap-2 flex-1 overflow-hidden">
 						<p class="text-base hidden md:block">INFORMATION</p>
 						<div class="min-h-4 md:min-h-8 w-full lines mb-1"></div>
@@ -108,7 +59,7 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 									tabs.map((tab) => (
 										<button
 											data-tab={tab}
-											class="tab-button relative text-left text-uppercase whitespace-nowrap uppercase text-sm opacity-50 focus max-md:border max-md:border-transparent border-dotted max-md:px-1 max-md:pt-1 max-md:pb-0.5 cursor-pointer"
+											class="tab-button relative text-left text-uppercase whitespace-nowrap uppercase text-sm opacity-50 focus cursor-pointer"
 											aria-selected={
 												tab === "info"
 													? "true"
@@ -128,7 +79,7 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 										alt="monitor"
 										loading="lazy"
 										decoding="async"
-										class="select-none pointer-events-none absolute inset-0 w-full h-full z-10"
+										class="absolute inset-0 w-full h-full z-10"
 										sizes="100vw"
 										src={crtImage}
 									/>
@@ -151,7 +102,7 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 								<SkillsTab />
 								<ProjectsTab />
 								<TimelineTab />
-								<SocialsTab />
+								<Socials />
 								<ContactTab />
 							</div>
 						</div>
@@ -229,7 +180,7 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 								alt="monitor"
 								loading="lazy"
 								decoding="async"
-								class="select-none pointer-events-none absolute inset-0 w-full h-full z-10"
+								class="absolute inset-0 w-full h-full z-10"
 								sizes="100vw"
 								src={crtImage}
 							/>
@@ -240,7 +191,7 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 								<CrtEffect
 									imageUrl={profileImage.src}
 									text="Gledrian Gutierrez"
-									subText="Software Engineer, ELEVENLABS"
+									subText="Software Engineer"
 								/>
 							</div>
 						</div>

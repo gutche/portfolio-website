@@ -19,16 +19,17 @@ const Socials = () => {
 	};
 
 	return (
-		<div className="flex flex-col gap-2">
+		<div data-tab="socials" className="flex flex-col gap-2 tab-panel">
 			{socials.map((social, index) => (
-				<button
+				<a
 					className={`${
 						selectedSocials.id === social.id ? "selected" : ""
-					} social-item p-3 text-left hover:bg-neutral-800/50 transition-colors duration-200`}
-					onClick={() => handleSocialsClick(social)}
+					} bg-neutral-900 p-3 text-left hover:bg-neutral-800/50 duration-200 cursor-pointer`}
+					href={social.url}
+					target="_blank"
 					key={index}>
 					<span className="font-medium">{social.name}</span>
-				</button>
+				</a>
 			))}
 		</div>
 	);

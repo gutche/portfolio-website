@@ -8,11 +8,11 @@ export const socials: Social[] = [
 	{
 		id: 1,
 		name: "GitHub",
-		url: "https://github.com/gledrian",
+		url: "https://github.com/gutche",
 	},
 	{
 		id: 2,
 		name: "LinkedIn",
-		url: "https://linkedin.com/in/gledrian",
+		url: "https://linkedin.com/in/gledrian-gutierrez",
 	},
 ];
