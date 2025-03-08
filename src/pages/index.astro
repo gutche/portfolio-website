@@ -2,8 +2,8 @@
 import "../styles/global.css";
 import Layout from "../layouts/Layout.astro";
 import { Image } from "astro:assets";
-import crtImage from "../assets/crt.png";
-import profileImage from "../assets/profile.png";
+import crtImage from "../../public/images/crt.png";
+import profileImage from "../../public/images/profile.png";
 import CrtEffect from "../components/CrtEffect.astro";
 import InfoTab from "../components/tabs/InfoTab.astro";
 import Career from "../components/tabs/Career.astro";
@@ -14,7 +14,7 @@ import Buttons from "../components/Buttons.astro";
 import Skills from "../components/tabs/Skills";
 import Projects from "../components/tabs/Projects";
 
-const tabs = ["info", "skills", "projects", "career", "socials"];
+const tabs = ["overview", "skills", "projects", "career", "socials"];
 ---
 
 <Layout>
@@ -36,12 +36,7 @@ const tabs = ["info", "skills", "projects", "career", "socials"];
 									tabs.map((tab) => (
 										<button
 											data-tab={tab}
-											class="tab-button relative text-left text-uppercase whitespace-nowrap uppercase text-sm opacity-50 focus cursor-pointer"
-											aria-selected={
-												tab === "info"
-													? "true"
-													: "false"
-											}>
+											class="tab-button relative text-left text-uppercase whitespace-nowrap uppercase text-sm opacity-50 focus cursor-pointer">
 											{tab.toUpperCase()}
 										</button>
 									))
@@ -233,13 +228,11 @@ const tabs = ["info", "skills", "projects", "career", "socials"];
 			}
 		}
 
-		// Add click event listeners to all tab buttons
 		const tabButtons = document.querySelectorAll(".tab-button");
 		const tabPanels = document.querySelectorAll(".tab-panel");
 		const tabLinks = document.querySelectorAll(".tab-link");
 
-		// Set the first tab as active by default
-		handleTabSwitch(tabButtons, tabPanels, "info");
+		handleTabSwitch(tabButtons, tabPanels, "overview");
 
 		tabButtons.forEach((button) => {
 			button.addEventListener("click", () => {
@@ -247,8 +240,7 @@ const tabs = ["info", "skills", "projects", "career", "socials"];
 				const targetTab = button.getAttribute("data-tab");
 				handleTabSwitch(tabButtons, tabPanels, targetTab || "");
 
-				if (targetTab === "info" && profileImageUrl) {
-					// Restore profile picture when going back to info tab
+				if (targetTab !== "projects" && profileImageUrl) {
 					updateCrtDisplay(
 						profileImageUrl,
 						"Gledrian Gutierrez",

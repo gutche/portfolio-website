@@ -40,10 +40,10 @@ const {
 		camera: THREE.OrthographicCamera = new THREE.OrthographicCamera();
 		renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer();
 		material: THREE.ShaderMaterial = new THREE.ShaderMaterial();
-		originalText: string = '';
-		originalSubText: string = '';
-		currentText: string = '';
-		currentSubText: string = '';
+		originalText: string = "";
+		originalSubText: string = "";
+		currentText: string = "";
+		currentSubText: string = "";
 		lastUpdateTime: number = 0;
 		updateInterval: number = 20;
 		charsToReveal: Set<number> = new Set();
@@ -57,7 +57,7 @@ const {
 			this.container = container;
 			this.width = Math.max(container.clientWidth, 1);
 			this.height = Math.max(container.clientHeight, 1);
-			
+
 			this.setupScene();
 
 			// Load the image before animation
@@ -142,15 +142,17 @@ const {
 
 				// Store original text for animation
 				this.originalText = text.toUpperCase();
-				this.originalSubText = subText ? subText.toUpperCase() : '';
-				this.currentText = Array(text.length).fill('_').join('');
-				this.currentSubText = subText ? Array(subText.length).fill('_').join('') : '';
+				this.originalSubText = subText ? subText.toUpperCase() : "";
+				this.currentText = Array(text.length).fill("_").join("");
+				this.currentSubText = subText
+					? Array(subText.length).fill("_").join("")
+					: "";
 				this.lastUpdateTime = 0;
 				this.updateInterval = 20;
 				this.charsToReveal = new Set();
 				this.subCharsToReveal = new Set();
 				this.animationStartTime = performance.now();
-				
+
 				// Draw main text with VT323 font
 				ctx.fillStyle = "white";
 				ctx.font = "28px VT323";
@@ -194,35 +196,50 @@ const {
 
 		updateTextTexture() {
 			if (!this.textCanvas) return;
-			
+
 			const now = performance.now();
 			if (now - this.lastUpdateTime < this.updateInterval) return;
 			this.lastUpdateTime = now;
 
-			const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-			let textArray = this.currentText.split('');
-			let subTextArray = this.currentSubText.split('');
-			
+			const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+			let textArray = this.currentText.split("");
+			let subTextArray = this.currentSubText.split("");
+
 			// Calculate progress based on time
-			const progress = Math.min((now - this.animationStartTime) / this.animationDuration, 1);
-			const targetRevealed = Math.floor(progress * this.originalText.length);
-			const targetSubRevealed = Math.floor(progress * this.originalSubText.length);
+			const progress = Math.min(
+				(now - this.animationStartTime) / this.animationDuration,
+				1
+			);
+			const targetRevealed = Math.floor(
+				progress * this.originalText.length
+			);
+			const targetSubRevealed = Math.floor(
+				progress * this.originalSubText.length
+			);
 
 			// Reveal characters based on progress
 			while (this.charsToReveal.size < targetRevealed) {
-				let availableIndices = Array.from(Array(this.originalText.length).keys())
-					.filter(i => !this.charsToReveal.has(i));
+				let availableIndices = Array.from(
+					Array(this.originalText.length).keys()
+				).filter((i) => !this.charsToReveal.has(i));
 				if (availableIndices.length > 0) {
-					let randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+					let randomIndex =
+						availableIndices[
+							Math.floor(Math.random() * availableIndices.length)
+						];
 					this.charsToReveal.add(randomIndex);
 				}
 			}
 
 			while (this.subCharsToReveal.size < targetSubRevealed) {
-				let availableIndices = Array.from(Array(this.originalSubText.length).keys())
-					.filter(i => !this.subCharsToReveal.has(i));
+				let availableIndices = Array.from(
+					Array(this.originalSubText.length).keys()
+				).filter((i) => !this.subCharsToReveal.has(i));
 				if (availableIndices.length > 0) {
-					let randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+					let randomIndex =
+						availableIndices[
+							Math.floor(Math.random() * availableIndices.length)
+						];
 					this.subCharsToReveal.add(randomIndex);
 				}
 			}
@@ -232,7 +249,8 @@ const {
 				if (this.charsToReveal.has(i)) {
 					textArray[i] = this.originalText[i];
 				} else if (Math.random() < 0.5) {
-					textArray[i] = chars[Math.floor(Math.random() * chars.length)];
+					textArray[i] =
+						chars[Math.floor(Math.random() * chars.length)];
 				}
 			}
 
@@ -241,19 +259,20 @@ const {
 				if (this.subCharsToReveal.has(i)) {
 					subTextArray[i] = this.originalSubText[i];
 				} else if (Math.random() < 0.5) {
-					subTextArray[i] = chars[Math.floor(Math.random() * chars.length)];
+					subTextArray[i] =
+						chars[Math.floor(Math.random() * chars.length)];
 				}
 			}
 
-			this.currentText = textArray.join('');
-			this.currentSubText = subTextArray.join('');
+			this.currentText = textArray.join("");
+			this.currentSubText = subTextArray.join("");
 
 			// Update canvas
-			const ctx = this.textCanvas.getContext('2d');
+			const ctx = this.textCanvas.getContext("2d");
 			if (!ctx) return;
 
 			ctx.clearRect(0, 0, this.textCanvas.width, this.textCanvas.height);
-			
+
 			// Redraw box and text
 			const bottomPadding = 40;
 			const leftPadding = 40;
@@ -280,8 +299,14 @@ const {
 
 			// Draw line and subtext
 			ctx.beginPath();
-			ctx.moveTo(leftPadding + 10, this.textCanvas.height - bottomPadding - 40);
-			ctx.lineTo(leftPadding + boxWidth - 10, this.textCanvas.height - bottomPadding - 40);
+			ctx.moveTo(
+				leftPadding + 10,
+				this.textCanvas.height - bottomPadding - 40
+			);
+			ctx.lineTo(
+				leftPadding + boxWidth - 10,
+				this.textCanvas.height - bottomPadding - 40
+			);
 			ctx.stroke();
 
 			if (this.subText) {
@@ -330,7 +355,7 @@ const {
 					scanSpeed: { value: 0.25 },
 					scanWidth: { value: 0.03 },
 					pixelShift: { value: 0.025 },
-					decryptProgress: { value: 0.0 }
+					decryptProgress: { value: 0.0 },
 				},
 				vertexShader: `
 					varying vec2 vUv;
@@ -415,7 +440,7 @@ const {
 						gl_FragColor = vec4(result, 1.0);
 					}
 				`,
-				transparent: false
+				transparent: false,
 			});
 
 			const plane = new THREE.Mesh(geometry, this.material);
@@ -427,12 +452,12 @@ const {
 			requestAnimationFrame(this.animate.bind(this));
 			const time = performance.now() / 1000;
 			this.material.uniforms.time.value = time;
-			
+
 			// Update text animation
 			if (this.textCanvas) {
 				this.updateTextTexture();
 			}
-			
+
 			this.renderer.render(this.scene, this.camera);
 		}
 
@@ -487,13 +512,15 @@ const {
 		// Add new method to update text
 		updateText(text: string, subText: string | null) {
 			this.originalText = text.toUpperCase();
-			this.originalSubText = subText ? subText.toUpperCase() : '';
-			this.currentText = Array(text.length).fill('_').join('');
-			this.currentSubText = subText ? Array(subText.length).fill('_').join('') : '';
+			this.originalSubText = subText ? subText.toUpperCase() : "";
+			this.currentText = Array(text.length).fill("_").join("");
+			this.currentSubText = subText
+				? Array(subText.length).fill("_").join("")
+				: "";
 			this.charsToReveal = new Set();
 			this.subCharsToReveal = new Set();
 			this.animationStartTime = performance.now();
-			
+
 			if (this.textCanvas) {
 				this.updateTextTexture();
 			}
@@ -501,7 +528,9 @@ const {
 	}
 
 	document.addEventListener("DOMContentLoaded", () => {
-		const containers = document.querySelectorAll(".crt-container, .crt-container-mobile");
+		const containers = document.querySelectorAll(
+			".crt-container, .crt-container-mobile"
+		);
 		containers.forEach((container) => {
 			if (!(container instanceof HTMLElement)) return;
 			const crtEffect = new CRTEffect(container);
