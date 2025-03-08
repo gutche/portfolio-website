@@ -1,34 +1,16 @@
-import { useState } from "react";
-import { socials, type Social } from "../../data/socials";
-import { playAudio, updateCrtDisplay } from "../../utils/helpers";
-import { isMuted } from "../../stores/audioStore";
+import { socials } from "../../data/socials";
 
 const Socials = () => {
-	const [selectedSocials, setSelectedSocials] = useState(socials[0]);
-
-	const handleSocialsClick = (social: Social) => {
-		setSelectedSocials(social);
-		updateCrtDisplay("", social.name, social.url);
-
-		const switchSound = document.getElementById(
-			"switch-sound"
-		) as HTMLAudioElement;
-		const audioIndicator = document.getElementById("audioIndicator");
-
-		playAudio(switchSound, audioIndicator!, isMuted.value);
-	};
-
 	return (
 		<div data-tab="socials" className="flex flex-col gap-2 tab-panel">
+			You can reach out to me via:
 			{socials.map((social, index) => (
 				<a
-					className={`${
-						selectedSocials.id === social.id ? "selected" : ""
-					} bg-neutral-900 p-3 text-left hover:bg-neutral-800/50 duration-200 cursor-pointer`}
+					className="relative border border-dotted w-full border-neutral-500 flex-1 px-1.5 text-start focus"
 					href={social.url}
 					target="_blank"
 					key={index}>
-					<span className="font-medium">{social.name}</span>
+					<h1 className="text-base py-1">{social.name}</h1>
 				</a>
 			))}
 		</div>

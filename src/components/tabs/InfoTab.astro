@@ -1,22 +1,21 @@
 ---
 interface Props {
-    class?: string;
+	class?: string;
 }
 
 const { class: className } = Astro.props;
 ---
 
 <div class:list={["tab-panel", className]} data-tab="info">
-    <div class="flex flex-col gap-4">
-        <p class="text-base">
-            Gledrian is a
-            <span class="text-primary border-b border-dotted">Software Engineer</span>
-            with an unhealthy obession for tech and sports.
-        </p>
-        <p class="text-base">
-            <a href="#" class="tab-link text-primary border-b border-dotted">
-                Read more about me
-            </a>
-        </p>
-    </div>
-</div> 
+	<div class="flex flex-col gap-4">
+		<p class="text-base">
+			Gledrian is a Software Engineer with an unhealthy obession for tech
+			and sports.
+		</p>
+		<p class="text-base">
+			<a href="#" class="tab-link text-primary border-b border-dotted">
+				Read full CV
+			</a>
+		</p>
+	</div>
+</div>

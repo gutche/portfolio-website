@@ -6,42 +6,19 @@ import crtImage from "../assets/crt.png";
 import profileImage from "../assets/profile.png";
 import CrtEffect from "../components/CrtEffect.astro";
 import InfoTab from "../components/tabs/InfoTab.astro";
-import SkillsTab from "../components/tabs/SkillsTab.astro";
-import ProjectsTab from "../components/tabs/ProjectsTab.astro";
-import TimelineTab from "../components/tabs/TimelineTab.astro";
-import ContactTab from "../components/tabs/ContactTab.astro";
+import Career from "../components/tabs/Career.astro";
 import Socials from "../components/tabs/Socials";
 import HorizontalLines from "../components/HorizontalLines.astro";
+import AudioOverlay from "../components/AudioOverlay.astro";
+import Buttons from "../components/Buttons.astro";
+import Skills from "../components/tabs/Skills";
+import Projects from "../components/tabs/Projects";
 
-const tabs = ["info", "skills", "projects", "timeline", "socials"];
+const tabs = ["info", "skills", "projects", "career", "socials"];
 ---
 
 <Layout>
-	<!-- Audio Overlay -->
-	<!-- <div
-		id="audioOverlay"
-		class="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
-		<div
-			class="bg-neutral-900 p-8 rounded-lg max-w-md w-full mx-4 border border-neutral-800 shadow-2xl">
-			<h2 class="text-2xl mb-6 text-center">Audio Experience</h2>
-			<p class="text-neutral-400 mb-8 text-center">
-				This site features an immersive audio experience with retro
-				sound effects. Would you like to enable audio? (Recommended)
-			</p>
-			<div class="flex gap-4 justify-center">
-				<button
-					id="enableAudio"
-					class="px-6 py-3 bg-neutral-800 hover:bg-neutral-700 rounded-md transition-colors duration-200 flex items-center gap-2">
-					Enable Audio
-				</button>
-				<button
-					id="skipAudio"
-					class="px-6 py-3 bg-transparent hover:bg-neutral-800 rounded-md transition-colors duration-200 border border-neutral-700">
-					Continue Without Audio
-				</button>
-			</div>
-		</div>
-	</div> -->
+	<!-- <AudioOverlay /> -->
 	<div class="md:h-screen flex md:overflow-hidden">
 		<div class="lines flex-1"></div>
 		<div class="flex w-full max-w-[1400px]">
@@ -99,67 +76,14 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 							<!-- Tab Content Sections -->
 							<div id="tab-content" class="w-full">
 								<InfoTab />
-								<SkillsTab />
-								<ProjectsTab />
-								<TimelineTab />
+								<Skills />
+								<Projects client:visible />
+								<Career />
 								<Socials />
-								<ContactTab />
 							</div>
 						</div>
 					</div>
-
-					<div
-						class="fixed bottom-0 left-0 right-0 bg-neutral-900 p-2 md:relative md:p-0 md:border-none md:bg-transparent md:mt-auto md:bottom-auto">
-						<div
-							class="absolute top-0 left-0 right-0 w-full md:hidden">
-							<div class="h-px bg-white w-full opacity-10">
-							</div><div class="h-px bg-black w-full"></div>
-						</div><div class="relative flex gap-0.5 p-0.5 w-full">
-							<div class="flex-1">
-								<div
-									class="absolute inset-0 bg-black z-0 blur-[1px] shadow-[0_1px_1px_rgba(255,255,255,0.3)] rounded-[6px]">
-								</div>
-								<a
-									href="https://mail.google.com/mail/?view=cm&fs=1&to=gledrian.dev@gmail.com&su=Hey%20Gledrian!"
-									target="_blank"
-									rel="noopener noreferrer"
-									class="z-10 relative p-2 bg-neutral-900 w-full h-14 shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45),_inset_0_1px_2px_rgba(255,255,255,0.3)] rounded-[4px] focus active:shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45)] active:scale-[0.99] transition-all duration-200 block hover:bg-neutral-800"
-									><div
-										class="h-full w-full flex items-center justify-center rounded-full bg-neutral-900 blur-[2px] shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),_0_5px_4px_rgba(0,0,0,0.75)]">
-									</div><span
-										class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-base uppercase pt-1 whitespace-nowrap"
-										>Send a message</span
-									></a
-								>
-							</div>
-							<div class="w-14">
-								<div
-									class="absolute inset-0 bg-black z-0 blur-[1px] shadow-[0_1px_1px_rgba(255,255,255,0.3)] rounded-[6px]">
-								</div><button
-									id="audioButton"
-									class="z-10 relative p-2 bg-neutral-900 w-full h-14 shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45),_inset_0_1px_2px_rgba(255,255,255,0.3)] rounded-[4px] focus active:shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45)] active:scale-[0.99] transition-all duration-200"
-									><div
-										class="h-full w-full flex items-center justify-center rounded-full bg-neutral-900 blur-[2px] shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),_0_5px_4px_rgba(0,0,0,0.75)]">
-									</div><span
-										class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-base uppercase pt-1 whitespace-nowrap"
-										><svg
-											fill="none"
-											xmlns="http://www.w3.org/2000/svg"
-											viewBox="0 0 24 24"
-											width="16"
-											height="16"
-											><path
-												d="M11 2h2v20h-2v-2H9v-2h2V6H9V4h2V2zM7 8V6h2v2H7zm0 8H3V8h4v2H5v4h2v2zm0 0v2h2v-2H7zm10-6h-2v4h2v-4zm2-2h2v8h-2V8zm0 8v2h-4v-2h4zm0-10v2h-4V6h4z"
-												fill="currentColor"></path></svg
-										></span
-									><span
-										id="audioIndicator"
-										class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#FFF9FB] rounded-full blur-[0.4px] shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]"
-									></span></button
-								>
-							</div>
-						</div>
-					</div>
+					<Buttons />
 				</div>
 			</div>
 
@@ -240,11 +164,6 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 		const audioButton = document.getElementById("audioButton");
 		const audioIndicator = document.getElementById("audioIndicator");
 
-		// Set volume for sound effects
-		if (clickSound) clickSound.volume = 0.5;
-		if (switchSound) switchSound.volume = 0.5;
-		if (bgAudio) bgAudio.volume = 0.5;
-
 		let isPlaying = false;
 
 		// Initialize the indicator to red (muted state)
@@ -320,13 +239,6 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 		// Set the first tab as active by default
 		handleTabSwitch(tabButtons, tabPanels, "info");
 
-		// Initialize CRT display with profile picture
-		updateCrtDisplay(
-			profileImageUrl || "",
-			"Gledrian Gutierrez",
-			"Software Engineer, ELEVENLABS"
-		);
-
 		tabButtons.forEach((button) => {
 			button.addEventListener("click", () => {
 				playClickSound();
@@ -354,7 +266,6 @@ const tabs = ["info", "skills", "projects", "timeline", "socials"];
 </script>
 
 <style>
-	/* Add any additional styles for tab functionality */
 	.tab-button[aria-selected="true"] {
 		opacity: 1;
 	}
