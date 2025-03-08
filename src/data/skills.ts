@@ -22,7 +22,12 @@ export const skills: Skill[] = [
 	},
 	{
 		id: "devops",
-		title: "CI/CD",
-		technologies: "Jenkins, Github Actions",
+		title: "DevOps",
+		technologies: "CI/CD, Jenkins, Github Actions, Docker",
+	},
+	{
+		id: "testing",
+		title: "Testing frameworks",
+		technologies: "Cypress, Jasmine",
 	},
 ];

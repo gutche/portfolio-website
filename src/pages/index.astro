@@ -205,6 +205,7 @@ const tabs = ["info", "skills", "projects", "career", "socials"];
 		const playClickSound = () => {
 			if (clickSound && isPlaying) {
 				clickSound.currentTime = 0;
+				clickSound.volume = 0.2;
 				clickSound
 					.play()
 					.catch((e) => console.log("Error playing sound:", e));
@@ -215,6 +216,7 @@ const tabs = ["info", "skills", "projects", "career", "socials"];
 		const playSwitchSound = () => {
 			if (switchSound && isPlaying) {
 				switchSound.currentTime = 0;
+				switchSound.volume = 0.2;
 				switchSound
 					.play()
 					.catch((e) => console.log("Error playing sound:", e));

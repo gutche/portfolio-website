@@ -1,8 +1,34 @@
-import { useState } from "react";
+import { useState, type SetStateAction } from "react";
 import { projects } from "../../data/projects";
+import { updateCrtDisplay } from "../../utils/helpers";
 
 const Projects = () => {
 	const [selectedProject, setSelectedProject] = useState(0);
+
+	const playSwitchSound = () => {
+		const switchSound = document.getElementById(
+			"switch-sound"
+		) as HTMLAudioElement;
+		const audioIndicator = document.getElementById("audioIndicator");
+		if (
+			switchSound &&
+			audioIndicator?.classList.contains(
+				"shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]"
+			)
+		) {
+			switchSound.currentTime = 0;
+			switchSound
+				.play()
+				.catch((e) => console.log("Error playing sound:", e));
+		}
+	};
+
+	const handleClick = (index: number) => {
+		setSelectedProject(index);
+		const { image, title, description } = projects[index];
+		updateCrtDisplay(image, title, description);
+		playSwitchSound();
+	};
 
 	return (
 		<div className="tab-panel" data-tab="projects">
@@ -17,7 +43,7 @@ const Projects = () => {
 						<button
 							key={index}
 							className="relative border w-full border-neutral-500 flex-1 px-1.5 text-start focus cursor-pointer"
-							onClick={() => setSelectedProject(index)}>
+							onClick={() => handleClick(index)}>
 							<h1 className="text-base py-1">{project.title}</h1>
 							<p className="text-sm border-t border-neutral-500 border-dotted py-1">
 								{project.description}
