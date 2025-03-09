@@ -1,6 +1,6 @@
-import { useState, type SetStateAction } from "react";
+import { useState } from "react";
 import { projects } from "../../data/projects";
-import { updateCrtDisplay } from "../../utils/helpers";
+import { displayParams } from "../../stores/globalStore";
 
 const Projects = () => {
 	const [selectedProject, setSelectedProject] = useState(0);
@@ -25,8 +25,8 @@ const Projects = () => {
 
 	const handleClick = (index: number) => {
 		setSelectedProject(index);
-		const { image, title, description } = projects[index];
-		updateCrtDisplay(image, title, description);
+		const { image, title, description } = projects[selectedProject];
+		displayParams.set({ image, title, description });
 		playSwitchSound();
 	};
 
@@ -34,8 +34,7 @@ const Projects = () => {
 		<div className="tab-panel" data-tab="projects">
 			<div className="flex flex-col gap-2">
 				<p className="text-base">
-					My projects include websites, applications, and various tech
-					experiments. Here I'll showcase my best work.
+					Among his best works are the following:
 				</p>
 
 				<div className="flex flex-col gap-2 mb-4">
@@ -59,6 +58,14 @@ const Projects = () => {
 						</button>
 					))}
 				</div>
+				<p className="text-base">
+					<a
+						href="https:/github.com/gutche"
+						target="_blank"
+						className="tab-link text-primary border-b border-dotted">
+						Source code
+					</a>
+				</p>
 			</div>
 		</div>
 	);

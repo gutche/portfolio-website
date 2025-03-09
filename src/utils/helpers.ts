@@ -5,6 +5,13 @@ export const updateCrtDisplay = (
 ) => {
 	const crtContainer = document.querySelector(".crt-container");
 	const mobileCrtContainer = document.querySelector(".crt-container-mobile");
+	if (
+		(crtContainer as any).crtEffect.originalText === title.toUpperCase() ||
+		(mobileCrtContainer as any).crtEffect.originalText ===
+			title.toUpperCase()
+	) {
+		return;
+	}
 
 	if (crtContainer && (crtContainer as any).crtEffect) {
 		(crtContainer as any).crtEffect.updateImage(imageUrl);

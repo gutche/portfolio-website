@@ -1,12 +1,8 @@
 ---
-interface Props {
-	class?: string;
-}
 
-const { class: className } = Astro.props;
 ---
 
-<div class:list={["tab-panel", className]} data-tab="overview">
+<div class="tab-panel" data-tab="overview">
 	<div class="flex flex-col gap-4">
 		<p class="text-base">
 			Gledrian is a Software Engineer with an unhealthy obession for tech
@@ -14,7 +10,8 @@ const { class: className } = Astro.props;
 		</p>
 		<p class="text-base">
 			<a
-				href="https://youtube.com"
+				href="https:/github.com/gutche"
+				target="_blank"
 				class="tab-link text-primary border-b border-dotted">
 				Read full CV
 			</a>
