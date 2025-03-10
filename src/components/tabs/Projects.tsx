@@ -11,7 +11,7 @@ const Projects = () => {
 	const switchSoundRef = useRef<HTMLAudioElement | null>(null);
 
 	useEffect(() => {
-		switchSoundRef.current = new Audio("src/assets/switch.wav");
+		switchSoundRef.current = new Audio("/sfx/switch.wav");
 		switchSoundRef.current.volume = 0.2;
 	}, []);
 

@@ -9,7 +9,7 @@ const Buttons = () => {
 	const backgroundAudioRef = useRef<HTMLAudioElement | null>(null);
 
 	useEffect(() => {
-		backgroundAudioRef.current = new Audio("src/assets/ambient.mp3");
+		backgroundAudioRef.current = new Audio("/sfx/ambient.mp3");
 		backgroundAudioRef.current.volume = 0.2;
 		backgroundAudioRef.current.loop = true;
 	}, []);

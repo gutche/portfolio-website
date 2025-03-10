@@ -26,7 +26,7 @@ const Main = () => {
 	const $isMuted = useStore(isMuted);
 
 	useEffect(() => {
-		clickSoundRef.current = new Audio("src/assets/click.wav");
+		clickSoundRef.current = new Audio("/sfx/click.wav");
 		clickSoundRef.current.volume = 0.2;
 	}, []);
 

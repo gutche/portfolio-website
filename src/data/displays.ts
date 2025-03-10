@@ -7,13 +7,13 @@ export const displays = [
 	},
 	{
 		id: 2,
-		image: "src/assets/astro-portfolio.png",
+		image: "/images/astro-portfolio.png",
 		title: "Old portfolio website",
 		description: "Minimalist personal portfolio made with Astro",
 	},
 	{
 		id: 3,
-		image: "src/assets/no-image.png",
+		image: "/images/no-image.png",
 		title: "Yappin",
 		description: "Messaging app under development",
 	},
