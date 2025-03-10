@@ -1,0 +1,62 @@
+const Header = () => {
+	const imgStyles = {
+		height: "20px",
+		width: "20px",
+		filter: "grayscale(100%) contrast(120%) brightness(90%)",
+	};
+
+	return (
+		<div className="flex justify-between items-center gap-1 mb-4 md:mb-12">
+			<div className="relative flex shadow-[inset_0_1px_4px_rgba(0,0,0,0.8),_inset_0_-1px_2px_rgba(255,255,255,0.3)] p-2 rounded-[4px] border border-neutral-900">
+				<img
+					className="mr-1"
+					style={imgStyles}
+					src="/favicon.svg"
+					alt="user icon"
+				/>
+				PROFILE
+				<div className="absolute top-0 left-0 w-full h-full">
+					<span className="absolute -left-px -top-px h-1 w-1 border-l border-t border-white"></span>
+					<span className="absolute -right-px -top-px h-1 w-1 border-r border-t border-white"></span>
+					<span className="absolute -bottom-px -left-px h-1 w-1 border-b border-l border-white"></span>
+					<span className="absolute -bottom-px -right-px h-1 w-1 border-b border-r border-white"></span>
+				</div>
+			</div>
+			<div className="flex flex-col flex-1 h-8 gap-px justify-between">
+				<div>
+					<div className="h-px bg-white w-full opacity-10"></div>
+					<div className="h-px bg-neutral-950 w-full"></div>
+				</div>
+				<div>
+					<div className="h-px bg-white w-full opacity-10"></div>
+					<div className="h-px bg-neutral-950 w-full"></div>
+				</div>
+				<div>
+					<div className="h-px bg-white w-full opacity-10"></div>
+					<div className="h-px bg-neutral-950 w-full"></div>
+				</div>
+				<div>
+					<div className="h-px bg-white w-full opacity-10"></div>
+					<div className="h-px bg-neutral-950 w-full"></div>
+				</div>
+				<div>
+					<div className="h-px bg-white w-full opacity-10"></div>
+					<div className="h-px bg-neutral-950 w-full"></div>
+				</div>
+				<div>
+					<div className="h-px bg-white w-full opacity-10"></div>
+					<div className="h-px bg-neutral-950 w-full"></div>
+				</div>
+			</div>
+			<div className="relative flex shadow-[inset_0_1px_4px_rgba(0,0,0,0.8),_inset_0_-1px_2px_rgba(255,255,255,0.3)] p-2 rounded-[4px] border border-neutral-900">
+				GLEDRIAN GUTIERREZ
+				<span className="absolute -left-px -top-px h-1 w-1 border-l border-t border-white"></span>
+				<span className="absolute -right-px -top-px h-1 w-1 border-r border-t border-white"></span>
+				<span className="absolute -bottom-px -left-px h-1 w-1 border-b border-l border-white"></span>
+				<span className="absolute -bottom-px -right-px h-1 w-1 border-b border-r border-white"></span>
+			</div>
+		</div>
+	);
+};
+
+export default Header;

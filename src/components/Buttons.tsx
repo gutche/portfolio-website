@@ -11,7 +11,7 @@ const Buttons = () => {
 		if ($isMuted) {
 			bgAudio.pause();
 		} else {
-			bgAudio.volume = 0.8;
+			bgAudio.volume = 0.5;
 			bgAudio.play();
 		}
 	}, [$isMuted]);
