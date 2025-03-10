@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { isMuted } from "../stores/globalStore";
 import { useStore } from "@nanostores/react";
 
@@ -6,15 +6,20 @@ const Buttons = () => {
 	const [isOverlayHidden, setIsOverlayHidden] = useState(false);
 	const $isMuted = useStore(isMuted);
 
+	const backgroundAudioRef = useRef<HTMLAudioElement | null>(null);
+
 	useEffect(() => {
-		const bgAudio = document.getElementById("bgAudio")! as HTMLAudioElement;
-		if ($isMuted) {
-			bgAudio.pause();
-		} else {
-			bgAudio.volume = 0.5;
-			bgAudio.play();
-		}
-	}, [$isMuted]);
+		backgroundAudioRef.current = new Audio("src/assets/ambient.mp3");
+		backgroundAudioRef.current.volume = 0.2;
+		backgroundAudioRef.current.loop = true;
+	}, []);
+
+	const toggleMute = () => {
+		$isMuted
+			? backgroundAudioRef.current?.play()
+			: backgroundAudioRef.current?.pause();
+		isMuted.set(!$isMuted);
+	};
 
 	return (
 		<div className="fixed bottom-0 left-0 right-0 bg-neutral-900 p-2 md:relative md:p-0 md:border-none md:bg-transparent md:mt-auto md:bottom-auto">
@@ -40,7 +45,7 @@ const Buttons = () => {
 					<div className="absolute inset-0 bg-black z-0 blur-[1px] shadow-[0_1px_1px_rgba(255,255,255,0.3)] rounded-[6px]"></div>
 					<button
 						aria-label="mute button"
-						onClick={() => isMuted.set(!$isMuted)}
+						onClick={toggleMute}
 						className="z-10 relative p-2 bg-neutral-900 w-full h-14 shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45),_inset_0_1px_2px_rgba(255,255,255,0.3)] rounded-[4px] focus active:shadow-[inset_0_-1px_4px_rgba(0,0,0,0.45)] active:scale-[0.99] transition-all duration-200 ">
 						<div className="h-full w-full flex items-center justify-center rounded-full bg-neutral-900 blur-[2px] shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),_0_5px_4px_rgba(0,0,0,0.75)]"></div>
 						<span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-base uppercase pt-1 whitespace-nowrap">
@@ -80,7 +85,7 @@ const Buttons = () => {
 					<div className="flex gap-4 justify-center">
 						<button
 							onClick={() => {
-								isMuted.set(!$isMuted);
+								toggleMute();
 								setIsOverlayHidden(true);
 							}}
 							className="px-6 py-3 bg-neutral-800 hover:bg-neutral-700 rounded-md transition-colors duration-200 flex items-center gap-2">

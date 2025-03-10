@@ -1,25 +1,22 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { projects } from "../../data/projects";
-import { displayParams } from "../../stores/globalStore";
+import { displayParams, isMuted } from "../../stores/globalStore";
+import { useStore } from "@nanostores/react";
 
 const Projects = () => {
 	const [selectedProject, setSelectedProject] = useState(0);
+	const $isMuted = useStore(isMuted);
+	const switchSoundRef = useRef<HTMLAudioElement | null>(null);
+
+	useEffect(() => {
+		switchSoundRef.current = new Audio("src/assets/switch.wav");
+		switchSoundRef.current.volume = 0.2;
+	}, []);
 
 	const playSwitchSound = () => {
-		const switchSound = document.getElementById(
-			"switch-sound"
-		) as HTMLAudioElement;
-		const audioIndicator = document.getElementById("audioIndicator");
-		if (
-			switchSound &&
-			audioIndicator?.classList.contains(
-				"shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]"
-			)
-		) {
-			switchSound.currentTime = 0;
-			switchSound
-				.play()
-				.catch((e) => console.log("Error playing sound:", e));
+		if (!$isMuted && switchSoundRef.current) {
+			switchSoundRef.current.currentTime = 0;
+			switchSoundRef.current.play();
 		}
 	};
 

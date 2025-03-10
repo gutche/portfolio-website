@@ -7,6 +7,8 @@ import Overview from "./tabs/Overview";
 import Projects from "./tabs/Projects";
 import Skills from "./tabs/Skills";
 import Links from "./tabs/Links";
+import { useStore } from "@nanostores/react";
+import { isMuted } from "../stores/globalStore";
 
 const tabs = [
 	{ id: "overview", label: "Overview", component: <Overview /> },
@@ -19,13 +21,15 @@ const tabs = [
 const Main = () => {
 	const [activeTab, setActiveTab] = useState("overview");
 	const clickSoundRef = useRef<HTMLAudioElement | null>(null);
+	const $isMuted = useStore(isMuted);
 
 	useEffect(() => {
 		clickSoundRef.current = new Audio("src/assets/click.wav");
+		clickSoundRef.current.volume = 0.2;
 	}, []);
 
 	const playClickSound = () => {
-		if (clickSoundRef.current) {
+		if (clickSoundRef.current && !$isMuted) {
 			clickSoundRef.current.currentTime = 0;
 			clickSoundRef.current.play();
 		}
