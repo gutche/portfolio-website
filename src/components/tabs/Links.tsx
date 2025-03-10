@@ -1,20 +1,20 @@
-import { socials } from "../../data/socials";
+import { links } from "../../data/links";
 
-const Socials = () => {
+const Links = () => {
 	return (
 		<div data-tab="socials" className="flex flex-col gap-2 tab-panel">
 			View digital footprints:
-			{socials.map((social, index) => (
+			{links.map((link, index) => (
 				<a
 					className="relative border border-dotted w-full border-neutral-500 flex-1 px-1.5 text-start focus"
-					href={social.url}
+					href={link.url}
 					target="_blank"
 					key={index}>
-					<h1 className="text-base py-1">{social.name}</h1>
+					<h1 className="text-base py-1">{link.name}</h1>
 				</a>
 			))}
 		</div>
 	);
 };
 
-export default Socials;
+export default Links;

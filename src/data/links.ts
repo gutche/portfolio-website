@@ -1,10 +1,10 @@
-export interface Social {
+export interface Link {
 	id: number;
 	name: string;
 	url: string;
 }
 
-export const socials: Social[] = [
+export const links: Link[] = [
 	{
 		id: 1,
 		name: "GitHub",

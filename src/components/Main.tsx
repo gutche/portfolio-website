@@ -6,14 +6,14 @@ import Career from "./tabs/Career";
 import Overview from "./tabs/Overview";
 import Projects from "./tabs/Projects";
 import Skills from "./tabs/Skills";
-import Socials from "./tabs/Socials";
+import Links from "./tabs/Links";
 
 const tabs = [
 	{ id: "overview", label: "Overview", component: <Overview /> },
 	{ id: "skills", label: "Skills", component: <Skills /> },
 	{ id: "projects", label: "Projects", component: <Projects /> },
 	{ id: "career", label: "Career", component: <Career /> },
-	{ id: "socials", label: "Socials", component: <Socials /> },
+	{ id: "links", label: "Links", component: <Links /> },
 ];
 
 const Main = () => {
@@ -65,7 +65,6 @@ const Main = () => {
 									loading="eager"
 									decoding="async"
 									className="absolute inset-0 w-full h-full z-10"
-									sizes="100vw"
 									src="/images/crt.png"
 								/>
 								<div className="absolute inset-[5%] rounded-2xl overflow-hidden z-5">
