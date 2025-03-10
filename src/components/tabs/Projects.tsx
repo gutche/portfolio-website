@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { projects } from "../../data/projects";
-import { displayParams, isMuted } from "../../stores/globalStore";
+import { isMuted } from "../../stores/globalStore";
 import { useStore } from "@nanostores/react";
+import { updateDisplay } from "../../utils/DisplayUpdater";
+import { displays } from "../../data/displays";
 
 const Projects = () => {
 	const [selectedProject, setSelectedProject] = useState(0);
@@ -21,9 +23,9 @@ const Projects = () => {
 	};
 
 	const handleClick = (index: number) => {
+		if (selectedProject === index) return;
 		setSelectedProject(index);
-		const { image, title, description } = projects[selectedProject];
-		displayParams.set({ image, title, description });
+		updateDisplay(displays[index + 1]);
 		playSwitchSound();
 	};
 

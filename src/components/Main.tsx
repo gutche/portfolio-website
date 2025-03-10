@@ -9,6 +9,8 @@ import Skills from "./tabs/Skills";
 import Links from "./tabs/Links";
 import { useStore } from "@nanostores/react";
 import { isMuted } from "../stores/globalStore";
+import { updateDisplay } from "../utils/DisplayUpdater";
+import { displays } from "../data/displays";
 
 const tabs = [
 	{ id: "overview", label: "Overview", component: <Overview /> },
@@ -36,7 +38,9 @@ const Main = () => {
 	};
 
 	const handleTabClick = (tabId: string) => {
+		if (tabId === activeTab) return;
 		playClickSound();
+		updateDisplay(tabId !== "projects" ? displays[0] : displays[1]);
 		setActiveTab(tabId);
 	};
 
