@@ -18,7 +18,18 @@
 		<title>Gledrian Gutierrez</title>
 	</head>
 	<body>
-		<slot />
+		<div class="md:h-screen flex md:overflow-hidden">
+			<div class="lines flex-1"></div>
+			<slot />
+			<div class="lines flex-1"></div>
+		</div>
+		<div class="noise"></div>
+		<audio id="click-sound" src="/src/assets/click.wav" preload="auto"
+		></audio>
+		<audio id="switch-sound" src="/src/assets/switch.wav" preload="auto"
+		></audio>
+		<audio id="bgAudio" src="/src/assets/ambient.mp3" loop preload="auto"
+		></audio>
 	</body>
 </html>
 

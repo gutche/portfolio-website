@@ -8,8 +8,7 @@ import InfoTab from "../components/tabs/InfoTab.astro";
 import Career from "../components/tabs/Career.astro";
 import Socials from "../components/tabs/Socials";
 import HorizontalLines from "../components/HorizontalLines.astro";
-import AudioOverlay from "../components/AudioOverlay.astro";
-import Buttons from "../components/Buttons.astro";
+import Buttons from "../components/Buttons.tsx";
 import Skills from "../components/tabs/Skills";
 import Projects from "../components/tabs/Projects";
 
@@ -17,119 +16,100 @@ const tabs = ["overview", "skills", "projects", "career", "socials"];
 ---
 
 <Layout>
-	<!-- <AudioOverlay /> -->
-	<div class="md:h-screen flex md:overflow-hidden">
-		<div class="lines flex-1"></div>
-		<div class="flex w-full max-w-[1400px]">
-			<div class="flex-1 w-full md:max-w-[500px]">
-				<div class="p-3 pb-24 md:p-4 flex flex-col h-full">
-					<HorizontalLines />
-					<div class="flex flex-col gap-2 flex-1 overflow-hidden">
-						<p class="text-base hidden md:block">INFORMATION</p>
-						<div class="min-h-4 md:min-h-8 w-full lines mb-1"></div>
-						<div
-							class="flex flex-col gap-3 md:flex-row md:gap-8 min-h-0">
-							<!-- Tab Buttons -->
-							<div class="flex md:flex-col gap-2">
-								{
-									tabs.map((tab) => (
-										<button
-											data-tab={tab}
-											class="tab-button relative text-left text-uppercase whitespace-nowrap uppercase text-sm opacity-50 focus cursor-pointer">
-											{tab.toUpperCase()}
-										</button>
-									))
-								}
-							</div>
-							<!-- Mobile CRT -->
-							<div class="w-full md:hidden">
-								<div
-									class="relative w-full aspect-square max-w-xs mx-auto">
-									<!-- Monitor overlay -->
-									<Image
-										alt="monitor"
-										loading="eager"
-										decoding="async"
-										class="absolute inset-0 w-full h-full z-10"
-										sizes="100vw"
-										src={crtImage}
-									/>
+	<div class="flex w-full max-w-[1400px] bg-neutral-900">
+		<div class="flex-1 w-full md:max-w-[500px]">
+			<div class="p-3 pb-24 md:p-4 flex flex-col h-full">
+				<HorizontalLines />
+				<div class="flex flex-col gap-2 flex-1 overflow-hidden">
+					<p class="text-base hidden md:block">INFORMATION</p>
+					<div class="min-h-4 md:min-h-8 w-full lines mb-1"></div>
+					<div
+						class="flex flex-col gap-3 md:flex-row md:gap-8 min-h-0">
+						<!-- Tab Buttons -->
+						<div class="flex md:flex-col gap-2">
+							{
+								tabs.map((tab) => (
+									<button
+										data-tab={tab}
+										class="tab-button relative text-left text-uppercase whitespace-nowrap uppercase text-sm opacity-50 focus">
+										{tab}
+									</button>
+								))
+							}
+						</div>
+						<!-- Mobile CRT -->
+						<div class="w-full z-0 md:hidden">
+							<div
+								class="relative w-full aspect-square max-w-xs mx-auto">
+								<!-- Monitor overlay -->
+								<Image
+									alt="monitor"
+									loading="eager"
+									decoding="async"
+									class="absolute inset-0 w-full h-full z-10"
+									sizes="100vw"
+									src={crtImage}
+								/>
 
-									<!-- CRT effect container -->
-									<div
-										class="absolute inset-[5%] rounded-2xl overflow-hidden z-5">
-										<CrtEffect client:load />
-									</div>
+								<!-- CRT effect container -->
+								<div
+									class="absolute inset-[5%] rounded-2xl overflow-hidden z-5">
+									<CrtEffect client:load />
 								</div>
 							</div>
-							<!-- Tab Content Sections -->
-							<div id="tab-content" class="w-full">
-								<InfoTab />
-								<Skills />
-								<Projects client:visible />
-								<Career />
-								<Socials />
-							</div>
+						</div>
+						<!-- Tab Content Sections -->
+						<div id="tab-content" class="w-full">
+							<InfoTab />
+							<Skills />
+							<Projects client:visible />
+							<Career />
+							<Socials />
 						</div>
 					</div>
-					<Buttons />
 				</div>
+				<Buttons client:load />
 			</div>
+		</div>
 
-			<div class="hidden md:flex">
-				<div class="h-screen bg-white w-px opacity-10"></div>
-				<div class="h-screen w-px bg-black"></div>
-			</div>
+		<div class="hidden md:flex">
+			<div class="h-screen bg-white w-px opacity-10"></div>
+			<div class="h-screen w-px bg-black"></div>
+		</div>
 
-			<!-- Desktop CRT -->
-			<div class="hidden flex-1 md:flex items-center">
-				<div
-					style="position:relative;width:85%;padding-bottom:85%;margin:0 auto">
-					<div
-						style="position:absolute;top:0;right:0;bottom:0;left:0">
-						<div class="relative h-full w-full">
-							<!-- Monitor overlay -->
-							<Image
-								alt="monitor"
-								loading="eager"
-								decoding="async"
-								class="absolute inset-0 w-full h-full z-10"
-								sizes="100vw"
-								src={crtImage}
-							/>
+		<!-- Desktop CRT -->
+		<div class="hidden flex-1 md:flex items-center">
+			<div
+				style="position:relative;width:85%;padding-bottom:85%;margin:0 auto">
+				<div style="position:absolute;top:0;right:0;bottom:0;left:0">
+					<div class="relative h-full w-full">
+						<!-- Monitor overlay -->
+						<Image
+							alt="monitor"
+							loading="eager"
+							decoding="async"
+							class="absolute inset-0 w-full h-full z-10"
+							sizes="100vw"
+							src={crtImage}
+						/>
 
-							<!-- CRT effect container -->
-							<div
-								class="absolute inset-[5%] rounded-3xl overflow-hidden z-5">
-								<CrtEffect client:load />
-							</div>
+						<!-- CRT effect container -->
+						<div
+							class="absolute inset-[5%] rounded-3xl overflow-hidden z-5">
+							<CrtEffect client:load />
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="lines flex-1"></div>
 	</div>
-	<div class="noise"></div>
-
-	<!-- Audio elements for sound effects -->
-	<audio id="click-sound" src="/src/assets/click.wav" preload="auto"></audio>
-	<audio id="switch-sound" src="/src/assets/switch.wav" preload="auto"
-	></audio>
-	<audio id="bgAudio" src="/src/assets/ambient.mp3" loop preload="auto"
-	></audio>
 </Layout>
 
 <script>
 	import { displayParams } from "../stores/globalStore";
-	import { handleTabSwitch, playAudio } from "../utils/helpers";
+	import { handleTabSwitch } from "../utils/helpers";
 
 	document.addEventListener("DOMContentLoaded", () => {
-		// Audio overlay elements
-		const audioOverlay = document.getElementById("audioOverlay");
-		const enableAudioBtn = document.getElementById("enableAudio");
-		const skipAudioBtn = document.getElementById("skipAudio");
-
 		// Sound elements
 		const clickSound = document.getElementById(
 			"click-sound"
@@ -137,46 +117,8 @@ const tabs = ["overview", "skills", "projects", "career", "socials"];
 		const switchSound = document.getElementById(
 			"switch-sound"
 		) as HTMLAudioElement;
-		const bgAudio = document.getElementById("bgAudio") as HTMLAudioElement;
-		const audioButton = document.getElementById("audioButton");
-		const audioIndicator = document.getElementById("audioIndicator");
 
 		let isPlaying = false;
-
-		// Initialize the indicator to red (muted state)
-		audioIndicator?.classList.remove(
-			"shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]"
-		);
-		audioIndicator?.classList.add(
-			"shadow-[0_0_10.4px_#FF0000,0_0_3.2px_#FF0000,0_0_3.2px_#FF0000]"
-		);
-
-		// Audio overlay handlers
-		enableAudioBtn?.addEventListener("click", () => {
-			if (audioOverlay) {
-				audioOverlay.style.display = "none";
-			}
-			// Enable audio
-			playAudio(bgAudio, audioIndicator!, isPlaying);
-			isPlaying = true;
-		});
-
-		skipAudioBtn?.addEventListener("click", () => {
-			if (audioOverlay) {
-				audioOverlay.style.display = "none";
-			}
-			// Keep audio disabled
-			isPlaying = false;
-		});
-
-		// Audio toggle functionality
-		const toggleAudio = (e: Event) => {
-			e.preventDefault();
-			e.stopPropagation();
-			console.log("Toggle audio clicked");
-			playAudio(bgAudio, audioIndicator!, isPlaying);
-			isPlaying = !isPlaying;
-		};
 
 		// Function to play click sound
 		const playClickSound = () => {
@@ -200,16 +142,6 @@ const tabs = ["overview", "skills", "projects", "career", "socials"];
 			}
 		};
 
-		// Add click listener to audio button and its children
-		if (audioButton) {
-			audioButton.addEventListener("click", toggleAudio);
-			// Also add to the span inside the button in case event bubbling is blocked
-			const audioButtonSpan = audioButton.querySelector("span");
-			if (audioButtonSpan) {
-				audioButtonSpan.addEventListener("click", toggleAudio);
-			}
-		}
-
 		const tabButtons = document.querySelectorAll(".tab-button");
 		const tabPanels = document.querySelectorAll(".tab-panel");
 		const tabLinks = document.querySelectorAll(".tab-link");
@@ -227,6 +159,13 @@ const tabs = ["overview", "skills", "projects", "career", "socials"];
 						image: "/images/profile.png",
 						title: "Gledrian Gutierrez",
 						description: "Software Engineer, ELEVENLABS",
+					});
+				} else {
+					displayParams.set({
+						image: "src/assets/astro-portfolio.png",
+						title: "Old portfolio website",
+						description:
+							"Minimalist personal portfolio made with Astro",
 					});
 				}
 			});

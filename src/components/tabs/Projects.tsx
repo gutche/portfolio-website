@@ -41,7 +41,7 @@ const Projects = () => {
 					{projects.map((project, index) => (
 						<button
 							key={index}
-							className="relative border w-full border-neutral-500 flex-1 px-1.5 text-start focus cursor-pointer"
+							className="relative border w-full border-neutral-500 flex-1 px-1.5 text-start focus"
 							onClick={() => handleClick(index)}>
 							<h1 className="text-base py-1">{project.title}</h1>
 							<p className="text-sm border-t border-neutral-500 border-dotted py-1">
