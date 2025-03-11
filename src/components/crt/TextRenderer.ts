@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export class TextRenderer {
-	textCanvas: HTMLCanvasElement | null = null;
+	textCanvas: HTMLCanvasElement;
 	originalText: string = "";
 	originalSubText: string = "";
 	currentText: string = "";
@@ -13,25 +13,31 @@ export class TextRenderer {
 	updateInterval: number = 20;
 	animationStartTime: number = 0;
 	animationDuration: number = 1500;
+	previousText: string = "";
+	previousSubText: string = "";
+	needsUpdate: boolean = false;
+
+	constructor() {
+		// Create canvas during initialization
+		this.textCanvas = document.createElement("canvas");
+		this.textCanvas.width = 512;
+		this.textCanvas.height = 512;
+	}
 
 	createTextTexture(
 		text: string,
 		subText: string | null
 	): THREE.CanvasTexture {
-		// Create a canvas for text
-		const canvas = document.createElement("canvas");
-		canvas.width = 512;
-		canvas.height = 512;
-		const ctx = canvas.getContext("2d");
+		const ctx = this.textCanvas.getContext("2d");
 
 		if (ctx) {
 			// Clear with transparent background
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.clearRect(0, 0, this.textCanvas.width, this.textCanvas.height);
 
 			// Position text at bottom with padding
 			const bottomPadding = 40;
 			const leftPadding = 40;
-			const boxWidth = canvas.width - leftPadding * 2;
+			const boxWidth = this.textCanvas.width - leftPadding * 2;
 
 			// Draw text box border with margin
 			ctx.strokeStyle = "white";
@@ -39,7 +45,7 @@ export class TextRenderer {
 			ctx.beginPath();
 			ctx.rect(
 				leftPadding,
-				canvas.height - bottomPadding - 80,
+				this.textCanvas.height - bottomPadding - 80,
 				boxWidth,
 				70
 			);
@@ -52,59 +58,64 @@ export class TextRenderer {
 			this.currentSubText = subText
 				? Array(subText.length).fill("_").join("")
 				: "";
+			this.previousText = this.currentText;
+			this.previousSubText = this.currentSubText;
 			this.lastUpdateTime = 0;
 			this.charsToReveal = new Set();
 			this.subCharsToReveal = new Set();
 			this.animationStartTime = performance.now();
+			this.needsUpdate = false;
 
 			// Draw main text with VT323 font
 			ctx.fillStyle = "white";
-			ctx.font = "28px VT323";
+			ctx.font = "28px VT323, monospace"; // Add fallback font
 			ctx.fillText(
 				this.currentText,
 				leftPadding + 20,
-				canvas.height - bottomPadding - 45
+				this.textCanvas.height - bottomPadding - 45
 			);
 
 			// Draw horizontal line below main text
 			ctx.beginPath();
-			ctx.moveTo(leftPadding + 10, canvas.height - bottomPadding - 40);
+			ctx.moveTo(
+				leftPadding + 10,
+				this.textCanvas.height - bottomPadding - 40
+			);
 			ctx.lineTo(
 				leftPadding + boxWidth - 10,
-				canvas.height - bottomPadding - 40
+				this.textCanvas.height - bottomPadding - 40
 			);
 			ctx.stroke();
 
 			// Draw subtext if provided with VT323 font
 			if (subText) {
-				ctx.font = "20px VT323";
+				ctx.font = "20px VT323, monospace"; // Add fallback font
 				ctx.fillText(
 					this.currentSubText,
 					leftPadding + 20,
-					canvas.height - bottomPadding - 20
+					this.textCanvas.height - bottomPadding - 20
 				);
 			}
 
-			// Store canvas for updates
-			this.textCanvas = canvas;
 			this.subText = subText;
 		}
 
-		const texture = new THREE.CanvasTexture(canvas);
-		texture.needsUpdate = true;
-		return texture;
+		// Create a new texture from the canvas
+		return new THREE.CanvasTexture(this.textCanvas);
 	}
 
-	updateTextTexture() {
-		if (!this.textCanvas) return;
-
+	shouldUpdateTextTexture(): boolean {
 		const now = performance.now();
-		if (now - this.lastUpdateTime < this.updateInterval) return;
+		if (now - this.lastUpdateTime < this.updateInterval) return false;
 		this.lastUpdateTime = now;
 
 		const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		let textArray = this.currentText.split("");
 		let subTextArray = this.currentSubText.split("");
+
+		// Save previous state to check if anything changed
+		this.previousText = this.currentText;
+		this.previousSubText = this.currentSubText;
 
 		// Calculate progress based on time
 		const progress = Math.min(
@@ -125,8 +136,23 @@ export class TextRenderer {
 		this.currentText = textArray.join("");
 		this.currentSubText = subTextArray.join("");
 
-		// Update canvas
-		this.redrawCanvas();
+		// Check if text has changed
+		const hasChanged =
+			this.currentText !== this.previousText ||
+			this.currentSubText !== this.previousSubText;
+
+		// Only redraw if there's a change
+		if (hasChanged) {
+			this.redrawCanvas();
+			this.needsUpdate = true;
+			return true;
+		}
+
+		return false;
+	}
+
+	getCanvas(): HTMLCanvasElement {
+		return this.textCanvas;
 	}
 
 	private updateCharReveal(
@@ -190,8 +216,6 @@ export class TextRenderer {
 	}
 
 	private redrawCanvas() {
-		if (!this.textCanvas) return;
-
 		const ctx = this.textCanvas.getContext("2d");
 		if (!ctx) return;
 
@@ -214,7 +238,7 @@ export class TextRenderer {
 		ctx.stroke();
 
 		ctx.fillStyle = "white";
-		ctx.font = "28px VT323";
+		ctx.font = "28px VT323, monospace";
 		ctx.fillText(
 			this.currentText,
 			leftPadding + 20,
@@ -234,7 +258,7 @@ export class TextRenderer {
 		ctx.stroke();
 
 		if (this.subText) {
-			ctx.font = "20px VT323";
+			ctx.font = "20px VT323, monospace";
 			ctx.fillText(
 				this.currentSubText,
 				leftPadding + 20,

@@ -5,28 +5,29 @@ import { CRTEffectClass } from "./CrtEffectEngine";
 
 const CrtEffect = () => {
 	const containerRef = useRef<HTMLDivElement>(null);
+	const effectInstanceRef = useRef<CRTEffectClass | null>(null);
 	const $displayParams = useStore(displayParams);
 
 	useEffect(() => {
 		if (!containerRef.current) return;
-		const effectInstance = new CRTEffectClass(
-			containerRef.current,
-			$displayParams
-		);
+
+		// Create the effect instance if it doesn't exist
+		if (!effectInstanceRef.current) {
+			effectInstanceRef.current = new CRTEffectClass(
+				containerRef.current,
+				$displayParams
+			);
+		} else {
+			// Otherwise just update the image
+			effectInstanceRef.current.loadImage($displayParams);
+		}
 
 		return () => {
-			// Cleanup
-			if (
-				containerRef.current &&
-				containerRef.current.contains(
-					effectInstance.renderer.domElement
-				)
-			) {
-				containerRef.current.removeChild(
-					effectInstance.renderer.domElement
-				);
+			// Clean up on unmount
+			if (effectInstanceRef.current) {
+				effectInstanceRef.current.dispose();
+				effectInstanceRef.current = null;
 			}
-			effectInstance.renderer.dispose();
 		};
 	}, [$displayParams]);
 
