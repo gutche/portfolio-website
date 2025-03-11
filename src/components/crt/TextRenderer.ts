@@ -16,6 +16,7 @@ export class TextRenderer {
 	previousText: string = "";
 	previousSubText: string = "";
 	needsUpdate: boolean = false;
+	canvasTexture: THREE.CanvasTexture | null = null;
 
 	constructor() {
 		// Create canvas during initialization
@@ -100,8 +101,14 @@ export class TextRenderer {
 			this.subText = subText;
 		}
 
+		// Dispose previous texture if it exists
+		if (this.canvasTexture) {
+			this.canvasTexture.dispose();
+		}
+
 		// Create a new texture from the canvas
-		return new THREE.CanvasTexture(this.textCanvas);
+		this.canvasTexture = new THREE.CanvasTexture(this.textCanvas);
+		return this.canvasTexture;
 	}
 
 	shouldUpdateTextTexture(): boolean {
@@ -153,6 +160,20 @@ export class TextRenderer {
 
 	getCanvas(): HTMLCanvasElement {
 		return this.textCanvas;
+	}
+
+	dispose() {
+		// Dispose of the canvas texture if it exists
+		if (this.canvasTexture) {
+			this.canvasTexture.dispose();
+			this.canvasTexture = null;
+		}
+
+		// Clear the canvas
+		const ctx = this.textCanvas.getContext("2d");
+		if (ctx) {
+			ctx.clearRect(0, 0, this.textCanvas.width, this.textCanvas.height);
+		}
 	}
 
 	private updateCharReveal(

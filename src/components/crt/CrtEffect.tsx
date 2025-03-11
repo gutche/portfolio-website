@@ -18,8 +18,13 @@ const CrtEffect = () => {
 				$displayParams
 			);
 		} else {
-			// Otherwise just update the image
-			effectInstanceRef.current.loadImage($displayParams);
+			// Instead of just updating the image, dispose and recreate
+			// to prevent WebGL context leaks
+			effectInstanceRef.current.dispose();
+			effectInstanceRef.current = new CRTEffectClass(
+				containerRef.current,
+				$displayParams
+			);
 		}
 
 		return () => {
