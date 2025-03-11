@@ -4,10 +4,12 @@ import Layout from "../layouts/Layout.astro";
 import Main from "../components/Main";
 import DesktopCrt from "../components/DesktopCrt";
 import Divider from "../components/Divider.astro";
+import Analytics from "@vercel/analytics/astro";
 ---
 
 <Layout>
 	<Main client:load />
 	<Divider />
 	<DesktopCrt client:load />
+	<Analytics />
 </Layout>
