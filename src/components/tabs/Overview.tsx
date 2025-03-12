@@ -1,18 +1,20 @@
 const Overview = () => {
+	const interests = ["Sports", "Video Games", "Travelling"];
+
+	const listStyle = {
+		listStyleType: "- ",
+	};
+
 	return (
 		<div className="tab-panel" data-tab="overview">
 			<div className="flex flex-col gap-4">
-				<p className="text-base">
-					Gledrian is a Software Engineer with an unhealthy obession
-					for tech and sports.
+				<p>
+					Gledrian is a Software Engineer based in Madrid, Spain,
+					where he earned his bachelor's degree in Software
+					Engineering from Rey Juan Carlos University.
 				</p>
-				<p className="text-base">
-					<a
-						href="https:/github.com/gutche"
-						target="_blank"
-						className="tab-link text-primary border-b border-dotted">
-						Read full CV
-					</a>
+				<p>
+					Beyond coding, he loves sports, video games, and traveling.
 				</p>
 			</div>
 		</div>
