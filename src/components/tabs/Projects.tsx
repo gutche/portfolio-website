@@ -33,7 +33,7 @@ const Projects = () => {
 		<div className="tab-panel" data-tab="projects">
 			<div className="flex flex-col gap-2">
 				<p className="text-base">
-					Among his best works are the following:
+					Among his best work are the following:
 				</p>
 
 				<div className="flex flex-col gap-2 mb-4">
