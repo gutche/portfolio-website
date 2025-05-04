@@ -30,4 +30,9 @@ export const skills: Skill[] = [
 		title: "Testing frameworks",
 		technologies: "Cypress, Jasmine, Jest",
 	},
+	{
+		id: "cloud",
+		title: "Cloud services",
+		technologies: "AWS, Azure",
+	},
 ];
