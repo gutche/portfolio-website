@@ -8,7 +8,7 @@ export const displays = [
 	{
 		id: 2,
 		image: "/images/no-image.png",
-		title: "Chirp",
-		description: "Expiring chat rooms",
+		title: "[ERROR] NO FOOTPRINTS FOUND  ",
+		description: "[STATUS] SCAN COMPLETE - 0x0 BYTES RECOVERED",
 	},
 ];

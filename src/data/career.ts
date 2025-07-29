@@ -7,8 +7,8 @@ export interface CareerEntry {
 export const career: CareerEntry[] = [
 	{
 		period: "2024 - Present",
-		description: "Seeking Opportunities",
-		institution: "Homeless Inc.",
+		description: "CEO of Unemployment",
+		institution: "",
 	},
 	{
 		period: "2024",

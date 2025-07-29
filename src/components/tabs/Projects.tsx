@@ -32,9 +32,7 @@ const Projects = () => {
 	return (
 		<div className="tab-panel" data-tab="projects">
 			<div className="flex flex-col gap-2">
-				<p className="text-base">
-					Among his best work are the following:
-				</p>
+				<p className="text-base">No data available</p>
 
 				<div className="flex flex-col gap-2 mb-4">
 					{projects.map((project, index) => (
@@ -57,14 +55,14 @@ const Projects = () => {
 						</button>
 					))}
 				</div>
-				<p className="text-base">
+				{/* <p className="text-base">
 					<a
 						href="https:/github.com/gutche"
 						target="_blank"
 						className="tab-link text-primary border-b border-dotted">
 						Source code
 					</a>
-				</p>
+				</p> */}
 			</div>
 		</div>
 	);
