@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { isMuted } from "../stores/globalStore";
 import { useStore } from "@nanostores/react";
 
 const Buttons = () => {
-	const [isOverlayHidden, setIsOverlayHidden] = useState(false);
 	const $isMuted = useStore(isMuted);
 
 	const backgroundAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -15,9 +14,7 @@ const Buttons = () => {
 	}, []);
 
 	const toggleMute = () => {
-		$isMuted
-			? backgroundAudioRef.current?.play()
-			: backgroundAudioRef.current?.pause();
+		$isMuted ? backgroundAudioRef.current?.play() : backgroundAudioRef.current?.pause();
 		isMuted.set(!$isMuted);
 	};
 
@@ -67,36 +64,6 @@ const Buttons = () => {
 									: "shadow-[0_0_10.4px_#00FF0A,0_0_3.2px_#00FF0A,0_0_3.2px_#00FF0A]"
 							} absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#FFF9FB] rounded-full blur-[0.4px] `}></span>
 					</button>
-				</div>
-			</div>
-			<div
-				className={`${
-					isOverlayHidden ? "hidden" : ""
-				} fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center`}>
-				<div className="bg-neutral-900 p-4 rounded-lg max-w-md mx-8 border border-neutral-800 shadow-2xl">
-					<h2 className="text-2xl mb-6 text-center">
-						Audio Experience
-					</h2>
-					<p className="text-neutral-400 mb-8 text-center">
-						This site features an immersive audio experience with
-						retro sound effects. Would you like to enable audio?
-						(Recommended)
-					</p>
-					<div className="flex gap-4 justify-center">
-						<button
-							onClick={() => {
-								toggleMute();
-								setIsOverlayHidden(true);
-							}}
-							className="px-6 py-3 bg-neutral-800 hover:bg-neutral-700 rounded-md transition-colors duration-200 flex items-center gap-2">
-							Enable Audio
-						</button>
-						<button
-							onClick={() => setIsOverlayHidden(true)}
-							className="px-6 py-3 bg-transparent hover:bg-neutral-800 rounded-md transition-colors duration-200 border border-neutral-700">
-							Continue Without Audio
-						</button>
-					</div>
 				</div>
 			</div>
 		</div>
