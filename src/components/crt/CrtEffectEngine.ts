@@ -40,10 +40,7 @@ export class CRTEffectClass {
 		}
 
 		// Properly dispose of the previous TextRenderer's textures
-		if (
-			this.material!.uniforms.tText &&
-			this.material!.uniforms.tText.value
-		) {
+		if (this.material!.uniforms.tText && this.material!.uniforms.tText.value) {
 			const oldTexture = this.material!.uniforms.tText.value;
 			if (oldTexture instanceof THREE.Texture) {
 				oldTexture.dispose();
@@ -52,10 +49,7 @@ export class CRTEffectClass {
 
 		// Recreate textRenderer
 		this.textRenderer = new TextRenderer();
-		const textTexture = this.textRenderer.createTextTexture(
-			title,
-			description
-		);
+		const textTexture = this.textRenderer.createTextTexture(title, description);
 
 		// Set text texture in the material
 		this.material!.uniforms.tText = { value: textTexture };
@@ -71,10 +65,7 @@ export class CRTEffectClass {
 				}
 
 				// Dispose previous texture if it exists
-				if (
-					this.material!.uniforms.tDiffuse &&
-					this.material!.uniforms.tDiffuse.value
-				) {
+				if (this.material!.uniforms.tDiffuse && this.material!.uniforms.tDiffuse.value) {
 					const oldTexture = this.material!.uniforms.tDiffuse.value;
 					if (oldTexture instanceof THREE.Texture) {
 						oldTexture.dispose();
@@ -120,9 +111,7 @@ export class CRTEffectClass {
 		if (this.renderer) {
 			this.renderer.dispose();
 			if (this.renderer.domElement.parentNode) {
-				this.renderer.domElement.parentNode.removeChild(
-					this.renderer.domElement
-				);
+				this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
 			}
 		}
 
@@ -188,9 +177,7 @@ export class CRTEffectClass {
 		// Instead of trying to update the existing texture, create a new one
 		if (this.textRenderer!.shouldUpdateTextTexture()) {
 			// Create a fresh texture with the updated canvas
-			const newTexture = new THREE.CanvasTexture(
-				this.textRenderer!.getCanvas()
-			);
+			const newTexture = new THREE.CanvasTexture(this.textRenderer!.getCanvas());
 
 			// Dispose the old texture properly
 			const oldTexture = this.material!.uniforms.tText.value;
@@ -255,9 +242,7 @@ export class CRTEffectClass {
 
 		// Remove renderer from DOM
 		if (this.renderer!!.domElement.parentNode) {
-			this.renderer!!.domElement.parentNode.removeChild(
-				this.renderer!!.domElement
-			);
+			this.renderer!!.domElement.parentNode.removeChild(this.renderer!!.domElement);
 		}
 
 		// Dispose all textures in uniforms
@@ -287,9 +272,7 @@ export class CRTEffectClass {
 						});
 					} else {
 						Object.keys(object.material).forEach((prop) => {
-							if (
-								object.material[prop] instanceof THREE.Texture
-							) {
+							if (object.material[prop] instanceof THREE.Texture) {
 								object.material[prop].dispose();
 							}
 						});
