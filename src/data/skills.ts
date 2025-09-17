@@ -23,7 +23,7 @@ export const skills: Skill[] = [
 	{
 		id: "devops",
 		title: "DevOps",
-		technologies: "CI/CD, Jenkins, Github Actions, Docker, Kubernetes, Terraform",
+		technologies: "CI/CD, Github Actions, Docker, Kubernetes, Terraform",
 	},
 	{
 		id: "testing",
