@@ -17,7 +17,7 @@ export const career: CareerEntry[] = [
 	},
 	{
 		period: "2023 - 2024",
-		description: "Software Engineering Intern",
+		description: "Frontend Engineer Intern",
 		institution: "Radisson Hotel Group",
 	},
 	{
